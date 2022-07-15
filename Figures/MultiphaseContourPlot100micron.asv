@@ -1,0 +1,32 @@
+
+P0 = 50; 
+
+
+if P0 == 50 %psi
+    analyzeddirec{1,1} = ['E:\PIV Data\Analyzed Results\2022_06_27\T3'];
+    analyzeddirec{2,1} = ['E:\PIV Data\Analyzed Results\2022_07_01\T6'];
+elseif P0 == 95 %psi
+    analyzeddirec{1,1} = ['E:\PIV Data\Analyzed Results\2022_06_27\T4'];
+    analyzeddirec{2,1} = ['E:\PIV Data\Analyzed Results\2022_07_01\T5'];
+end
+
+b = 0;
+for k = 1:numel(analyzeddirec)
+    load([analyzeddirec{k} '\PIVData.mat'])
+    for i = 1: numel(ucal)
+        ucalConcat = zeros(sizeX,sizeY,numel(ucal{1,i}));
+        for j = 1:numel(ucal{1,i})
+            ucalConcat(:,:,j) = ucal{1,i}{j,1};   
+        end
+        b = b+1; 
+        if k == 2
+            return
+        end
+        avgURunsdirecs(:,:,b) = mean(ucalConcat,3,'omitnan');
+    end
+end
+
+
+
+
+
