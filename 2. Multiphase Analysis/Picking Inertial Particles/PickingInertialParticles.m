@@ -14,35 +14,46 @@ green_color = '#31a354'; black_color = '#000000';
     [ProcessedRuns{1:length(A),1}] = A.name;
     ProcessedRuns = sortrows(ProcessedRuns); NumOfRuns = numel(ProcessedRuns); clear A
 %% Plotting raw image with found LPT track for each run
-load([analyzeddirec '\ParticleStats.mat'])
+% load([analyzeddirec '\ParticleStats.mat'])
 load([analyzeddirec '\LPTData.mat'])
 
-
-
 for Run = 1:1
-   
     disp(['On Run = ' num2str(Run) ' of ' num2str(NumOfRuns)])
-    A = dir([processeddirec '\Inertial Particles\R' num2str(Run) '\*.tiff']);ImageDirec = {};
-    [ImageDirec{1:length(A),1}] = A.name;
-    ImageDirec = sortrows(ImageDirec); clear A
-    Index = ceil(numel(ImageDirec)/2); 
 
-    temp = imread([processeddirec '\Inertial Particles\R' num2str(Run) filesep ImageDirec{Index}]);
+    Frame = vtracks{Run}(1).T(1);
+
+     A = dir([processeddirec '\Inertial Particles\R' num2str(Run) '\*.tiff']); ImageDirec = {};
+    [ImageDirec{1:length(A),1}] = A.name;
+    ImageDirec = sortrows(ImageDirec); NumOfRuns = numel(ImageDirec); clear A
+    temp = imread([processeddirec '\Inertial Particles\R' num2str(Run) filesep ImageDirec{Frame}]);
+
+    
+    XLocations = zeros(1,numel(tracks{Run})); YLocations = zeros(1,numel(tracks{Run}));
+    for i = 1:numel(tracks{Run})
+        Index = find(tracks{Run}(i).T == Frame);
+        if numel(tracks{Run})~=numel(vtracks{Run})
+            disp('ERROR: Houston, we have a problem.')
+            return
+        end
+        XLocations(i) = tracks{Run}(i).X(Index);
+        YLocations(i) = tracks{Run}(i).Y(Index);
+    end
+    
 
     % Pick data
-    
     hFig = figure;
     imshow(temp)
     hold on
-    
+
+    hPlot = scatter(XLocations,YLocations,'blue','filled');
+   
     % create and enable the brush object
-    hPlot = scatter(ParticleCenters{Run}{Index}(:,1),ParticleCenters{Run}{Index}(:,2),40,'blue','filled');
+    
     title("Hold shift and select all particles of interest then close the window to finish",'FontName','Times New Roman')
     PrettyFigures(linewidth,fontsize,axiswidth)
     hFig.Position = [519,233,1.5e+03,10e+02];
 
     [XData,YData] = DataPicker(hFig,hPlot);
-
 end
     
    
