@@ -63,7 +63,7 @@ for Run = 1:NumOfRuns
     end
 end
 
-save([analyzeddirec '\InertialParticalSelection.mat','XData','YData','tracksParticleIndex'])
+save([analyzeddirec '\InertialParticalSelection.mat'], 'XData', 'YData','tracksParticleIndex')
     
    
 

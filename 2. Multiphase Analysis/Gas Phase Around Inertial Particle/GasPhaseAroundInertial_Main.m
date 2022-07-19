@@ -12,7 +12,7 @@ green_color = '#31a354'; black_color = '#000000';
 ParticleDiameter = 200e-6;
 dperPix = 6.625277859765377e-06;
 
-NumOfRuns = 1; NumOfFrames = 1;
+
 %% Load necessary data and obtain Run and Frame numbers
 
 load([analyzeddirec '\LPTData.mat'],'vtracks','tracks')
@@ -22,12 +22,12 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'tracksParticleIndex')
 %% Setting up settings for interrogation window
 
 IntWinSize = (x{1,1}{1,1}(1,2)-x{1,1}{1,1}(1,1)); %pixels %Getting the Interrogation window size of the PIV data
-D_HL = 3;%Number of interrogation windows to the left
-D_HR = 6; %Number of interrogation windows to the right
-D_VUP = 2; %Number of inerrogation windows above the particle
-D_VD = 2; %Number of interrogation
-Diameter = ceil(ParticleDiameter/dperPix) + 5;
-
+D_HL = 12;%Number of interrogation windows to the left
+D_HR = 24; %Number of interrogation windows to the right
+D_VUP = 8; %Number of inerrogation windows above the particle
+D_VD = 8; %Number of interrogation
+% Diameter = ceil(ParticleDiameter/dperPix) + 10;
+Diameter = 60;
 imageSizeX = 450; imageSizeY = 250;
 [columnsInImage, rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
 
@@ -103,13 +103,13 @@ for Run = 1:numel(tracksParticleIndex)
                 end
             end
 
-            UInertial{Run}{Frame,ParticleNum} = SumUInertial./WeightScale; %Renormalizing the velocities this is now you average
-            UInertial{Run}{Frame,ParticleNum}(isnan(UInertial{Run}{Frame,ParticleNum})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            UInertial{Run}{Frame,m} = SumUInertial./WeightScale; %Renormalizing the velocities this is now you average
+            UInertial{Run}{Frame,m}(isnan(UInertial{Run}{Frame,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
 
-            VInertial{Run}{Frame,ParticleNum} = SumVInertial./WeightScale; %Renormalizing the velocities this is now you average
-            VInertial{Run}{Frame,ParticleNum}(isnan(VInertial{Run}{Frame,ParticleNum})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            VInertial{Run}{Frame,m} = SumVInertial./WeightScale; %Renormalizing the velocities this is now you average
+            VInertial{Run}{Frame,m}(isnan(VInertial{Run}{Frame,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
 
         end
     end
 end
-save([analyzeddirec '\VelocityAroundInertialParticles.mat'], 'xgrid','ygrid','UInertial','VInertial')
+save([analyzeddirec '\VelocityAroundInertialParticles.mat'], 'xgrid','ygrid','UInertial','VInertial',"IntWinSize","D_HL","D_VD","RightBound","LeftBound","UpperBound","LowerBound","Diameter")
