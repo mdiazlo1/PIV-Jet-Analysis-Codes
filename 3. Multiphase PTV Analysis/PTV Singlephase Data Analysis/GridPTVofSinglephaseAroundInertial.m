@@ -41,6 +41,7 @@ for Run = 1:numel(tracksParticleIndex)
 
         ParticleLocationX = tracks{Run}(ParticleNum).X; %Pix
         ParticleLocationY = tracks{Run}(ParticleNum).Y; %Pix
+        Frames = vtracks{Run}(ParticleNum).T;
         ParticleVelocityU = mean(vtracks{Run}(ParticleNum).U)*dperPix*FPS; %m/s
         ParticleVelocityV = mean(vtracks{Run}(ParticleNum).V)*dperPix*FPS; %m/s
 
@@ -49,8 +50,10 @@ for Run = 1:numel(tracksParticleIndex)
         RightBound = ceil(ParticleLocationX + Diameter/2+D_HR*IntWinSize);
         UpperBound = ceil(ParticleLocationY + Diameter/2+D_VUP*IntWinSize);
         LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
-% 
-%         for Frame = 1:numel(ParticleLocationX)
+
+        for i = 1:numel(Frames)
+            Frame = i;
+    
 
             circlePixels = (rowsInImage - ParticleLocationY(Frame)).^2 + (columnsInImage - ParticleLocationX(Frame)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
 
@@ -59,6 +62,12 @@ for Run = 1:numel(tracksParticleIndex)
             SumVInertial = zeros(size(xgrid,1),size(xgrid,2));
             Iterations = zeros(size(xgrid,1),size(xgrid,2));
             WeightScale = zeros(size(xgrid,1),size(xgrid,2));
+
+
+
+
+
+        end
 
 
     end

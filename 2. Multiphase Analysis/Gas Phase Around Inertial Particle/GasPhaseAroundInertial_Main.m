@@ -54,7 +54,7 @@ for Run = 1:numel(tracksParticleIndex)
 
             circlePixels = (rowsInImage - ParticleLocationY(Frame)).^2 + (columnsInImage - ParticleLocationX(Frame)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
 
-            [xgrid,ygrid] = meshgrid(LeftBound:IntWinSize:RightBound, LowerBound:IntWinSize:UpperBound);
+            [xgrid,ygrid] = meshgrid(LeftBound(Frame):IntWinSize:RightBound(Frame), LowerBound(Frame):IntWinSize:UpperBound(Frame));
             SumUInertial = zeros(size(xgrid,1),size(xgrid,2));
             SumVInertial = zeros(size(xgrid,1),size(xgrid,2));
             Iterations = zeros(size(xgrid,1),size(xgrid,2));

@@ -60,10 +60,10 @@ for k = 1:NumOfRuns
 
     if numel(ImageNum)>=7
         m = m+1;
-        [vtracks{m},ntracks{m},meanlength{m},rmslength{m},tracks{m}] = PredictiveTracker(inputnames,Threshold,max_disp,[],area_lim,0,0);
+        [vtracksGas{m},ntracks{m},meanlength{m},rmslength{m},tracksGas{m}] = PredictiveTracker(inputnames,Threshold,max_disp,[],area_lim,0,0);
     end
 % clc;
 end
 
 
-save([analyzeddirec '\PTV_Singlephase'],'vtracks','tracks')
+save([analyzeddirec '\PTV_Singlephase'],'vtracksGas','tracksGas')
