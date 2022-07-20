@@ -1,8 +1,8 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['D:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
+processeddirec = ['D:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
+analyzeddirec = ['D:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -54,7 +54,8 @@ for Run = 1:numel(tracksParticleIndex)
 
             circlePixels = (rowsInImage - ParticleLocationY(Frame)).^2 + (columnsInImage - ParticleLocationX(Frame)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
 
-            [xgrid,ygrid] = meshgrid(LeftBound(Frame):IntWinSize:RightBound(Frame), LowerBound(Frame):IntWinSize:UpperBound(Frame));
+            [xgrid,ygrid] = meshgrid(LeftBound(Frame)+IntWinSize/2:IntWinSize:RightBound(Frame)-IntWinSize/2 ...
+                , LowerBound(Frame)+IntWinSize/2:IntWinSize:UpperBound(Frame)-IntWinSize/2);
             SumUInertial = zeros(size(xgrid,1),size(xgrid,2));
             SumVInertial = zeros(size(xgrid,1),size(xgrid,2));
             Iterations = zeros(size(xgrid,1),size(xgrid,2));
@@ -67,7 +68,7 @@ for Run = 1:numel(tracksParticleIndex)
                 for j = 1:size(x{Run}{Frame},1) %Loop through all y values of the data grid
                     ydata = y{Run}{Frame}(j,1); %determine y values from data grid
 
-                    if xdata<max(xgrid(1,:))+IntWinSize && xdata>min(xgrid(1,:))-IntWinSize && ydata<max(ygrid(:,1))+IntWinSize && ydata > min(ygrid(:,1))-IntWinSize %Check to see if the value from data grid is within the region of interest for that inertial particle
+                    if xdata<max(xgrid(1,:))+IntWinSize/2 && xdata>min(xgrid(1,:))-IntWinSize/2 && ydata<max(ygrid(:,1))+IntWinSize/2 && ydata > min(ygrid(:,1))-IntWinSize/2 %Check to see if the value from data grid is within the region of interest for that inertial particle
 
                         if ~circlePixels(ydata,xdata) %Ensures that we don't account for data that is within the particle radius of the final grid.
                             UtoAverage = zeros(size(xgrid,1),size(xgrid,2));

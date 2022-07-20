@@ -33,7 +33,8 @@ imageSizeX = 450; imageSizeY = 250;
 
 % Particle Information
 for Run = 1:numel(tracksParticleIndex)
-     disp(['On Run ' num2str(Run) ' of ' num2str(numel(tracksParticleIndex))])
+
+    disp(['On Run ' num2str(Run) ' of ' num2str(numel(tracksParticleIndex))])
     for m = 1:numel(tracksParticleIndex{Run})
 
 
@@ -41,7 +42,7 @@ for Run = 1:numel(tracksParticleIndex)
 
         ParticleLocationX = tracks{Run}(ParticleNum).X; %Pix
         ParticleLocationY = tracks{Run}(ParticleNum).Y; %Pix
-        Frames = vtracks{Run}(ParticleNum).T;
+        FramesInertial = tracks{Run}(ParticleNum).T;
         ParticleVelocityU = mean(vtracks{Run}(ParticleNum).U)*dperPix*FPS; %m/s
         ParticleVelocityV = mean(vtracks{Run}(ParticleNum).V)*dperPix*FPS; %m/s
 
@@ -50,23 +51,46 @@ for Run = 1:numel(tracksParticleIndex)
         RightBound = ceil(ParticleLocationX + Diameter/2+D_HR*IntWinSize);
         UpperBound = ceil(ParticleLocationY + Diameter/2+D_VUP*IntWinSize);
         LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
+            
+        for i = 1:numel(FramesInertial)
+            ParticleFrameInd = FrameInertial(i);
 
-        for i = 1:numel(Frames)
-            Frame = i;
-    
+            circlePixels = (rowsInImage - ParticleLocationY(ParticleFrameInd)).^2 ...
+                + (columnsInImage - ParticleLocationX(ParticleFrameInd)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
 
-            circlePixels = (rowsInImage - ParticleLocationY(Frame)).^2 + (columnsInImage - ParticleLocationX(Frame)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
 
-            [xgrid,ygrid] = meshgrid(LeftBound:IntWinSize:RightBound, LowerBound:IntWinSize:UpperBound);
+            [xgrid,ygrid] = meshgrid(LeftBound(ParticleFrameInd)+IntWinSize/2:IntWinSize:RightBound(ParticleFrameInd)-IntWinSize/2 ...
+                , LowerBound(ParticleFrameInd)+IntWinSize/2:IntWinSize:UpperBound(ParticleFrameInd)-IntWinSize/2);
+
             SumUInertial = zeros(size(xgrid,1),size(xgrid,2));
             SumVInertial = zeros(size(xgrid,1),size(xgrid,2));
             Iterations = zeros(size(xgrid,1),size(xgrid,2));
             WeightScale = zeros(size(xgrid,1),size(xgrid,2));
 
+            for GasTrack = 1:numel(vtracksGas{Run})
+                GasTrackFrame = vtracksGas{Run}(GasTrack).Frame;
+                
+                GasFrame = find(GasTrackFrame == Frames(i));
+
+                if isempty(GasFrame)
+                    continue
+                end
+
+                GasTrackX = vtracksGas{Run}(GasTrack).X(GasFrame); GasTrackY = vtracksGas{Run}(GasTrack).Y(GasFrame);
+                GasTrackU = vtracksGas{Run}(GasTrack).U(GasFrame);
+
+                if ~(GasTrackX>LeftBound && GasTrackX<RightBound && GasTrackY>LowerBound && GasTrackY<UpperBound)
+                    continue
+                end
+
+%                 for p = 1:numel()
+                
 
 
 
+            end
 
+           
         end
 
 
