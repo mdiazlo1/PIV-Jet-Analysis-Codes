@@ -1,8 +1,8 @@
 %% Directories
 Tnum = 3;
-datdirec = ['D:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['D:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['D:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
