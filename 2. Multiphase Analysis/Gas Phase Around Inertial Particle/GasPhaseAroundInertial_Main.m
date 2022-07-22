@@ -1,15 +1,15 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-ParticleDiameter = 200e-6;
+ParticleDiameter = 139e-6;
 dperPix = 6.625277859765377e-06;
 
 
@@ -22,13 +22,15 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'tracksParticleIndex')
 %% Setting up settings for interrogation window
 
 IntWinSize = (x{1,1}{1,1}(1,2)-x{1,1}{1,1}(1,1)); %pixels %Getting the Interrogation window size of the PIV data
-D_HL = 12;%Number of interrogation windows to the left
-D_HR = 24; %Number of interrogation windows to the right
-D_VUP = 8; %Number of inerrogation windows above the particle
-D_VD = 8; %Number of interrogation
-% Diameter = ceil(ParticleDiameter/dperPix) + 10;
-Diameter = 60;
-imageSizeX = 450; imageSizeY = 250;
+IntWinSize = 4;
+D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
+D_HR = ceil(96/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
+D_VUP = ceil(32/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
+D_VD = ceil(32/IntWinSize); %Number of interrogation; 8 for intwin 4
+
+Diameter = GetParticleDiameter(ParticleDiameter);
+
+imageSizeX = 400+1; imageSizeY = 250+1;
 [columnsInImage, rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
 
 % Particle Information
@@ -51,7 +53,9 @@ for Run = 1:numel(tracksParticleIndex)
         LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
 
         for Frame = 1:numel(ParticleLocationX)
-
+            if Frame>numel(ucal{Run})
+                continue
+            end
             circlePixels = (rowsInImage - ParticleLocationY(Frame)).^2 + (columnsInImage - ParticleLocationX(Frame)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
 
             [xgrid,ygrid] = meshgrid(LeftBound(Frame)+IntWinSize/2:IntWinSize:RightBound(Frame)-IntWinSize/2 ...
@@ -78,7 +82,10 @@ for Run = 1:numel(tracksParticleIndex)
 
                                 for p = 1:size(xgrid,1) %Loop through the new made up grid y values
                                     D_V = abs(ydata - ygrid(p,1)); %Obtain the vertical distance between the data y value and the made up grid y value
-                                    %                         if xgrid(1,k) > 0 && xgrid(1,k) < 400 && ygrid(p,1) > 0 && ygrid(p,1)<250
+                                 
+                                    if ygrid(p,1) <= 0 || xgrid(1,k)<=0 || ygrid(p,1) > 250 || xgrid(1,k) > 400
+                                        continue
+                                    end
                                     if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && ucal{Run}{Frame}(j,i) > 50%Check to see if the data grid box is overlapping with the made up grid box
                                         Xoverlap = IntWinSize - D_H; %obtain the amount of overlap in x distance
                                         Yoverlap = IntWinSize - D_V; %obtain the amount of overlap of in y distance
@@ -114,3 +121,13 @@ for Run = 1:numel(tracksParticleIndex)
     end
 end
 save([analyzeddirec '\VelocityAroundInertialParticles.mat'],'UInertial','VInertial',"IntWinSize","D_HL","D_VD","RightBound","LeftBound","UpperBound","LowerBound","Diameter")
+
+function Diameter = GetParticleDiameter(ParticleDiameter)
+
+if ParticleDiameter == 200e-6
+    Diameter = 60;
+elseif ParticleDiameter == 139e-6
+    Diameter = 45;
+
+end
+end

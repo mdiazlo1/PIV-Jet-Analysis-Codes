@@ -1,8 +1,8 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
 addpath("Oulette codes\")
 % Plot settings
 axiswidth = 2; linewidth = 2; 
@@ -30,11 +30,20 @@ NeedParticleStatistics = 1; %If you just need particle centroids and radii
 if NeedParticleTracks
     
     threshold = 65535;
-
+m = 0;
 
     for i = 1:NumOfRuns
         direc = [processeddirec '\Inertial Particles\R' num2str(i) '\*.tiff'];
-        [vtracks{i},ntracks,meanlength,rmslength,tracks{i}] = PredictiveTracker(direc,20,10,[],area_lim,0,0);
+
+        A = dir(direc); ImageNum = {};
+        [ImageNum{1:length(A),1}] = A.name;
+        ImageNum = sortrows(ImageNum)'; clear A
+
+        if numel(ImageNum)>=7
+            m = m+1;
+            [vtracks{i},ntracks,meanlength,rmslength,tracks{i}] = PredictiveTracker(direc,20,10,[],area_lim,0,0);
+        end
+
     end
 
 

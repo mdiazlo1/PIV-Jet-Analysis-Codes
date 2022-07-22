@@ -1,5 +1,5 @@
 %% Directories
-Tnum = 5;
+Tnum = 3;
 datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
 processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
 analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
@@ -19,7 +19,7 @@ FPS = 10e6; %10 millions frames per second
 % Settings
 Segmentation = 1; %1 = yes, you need segmentation since processed images haven't been generated yet. 0 = No, processed images already generated
 GetMask = 0; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
-EliminateImages = 1;
+ImageProcessing = 0;
 
 % Obtaining run files
 A = dir(datdirec); Runs = {};
@@ -35,13 +35,13 @@ for i = 1:NumOfRuns
 end
 
 %% Multiphase Image Segmentation
-
+    if ImageProcessing
     % Using imhistmatch to match the histogram of the images and then
     % adjusting the image brightnesses so that they are similar brightness
     % (necessary for PIV)
-    if EliminateImages == 1
+%     if EliminateImages == 1
         EliminateDarkImages(datdirec,datadirec,processeddirec)
-    end
+%     end
 
 
     %Adjusting brightness of images by matching the histogram of all of the
@@ -54,7 +54,7 @@ end
     %particles and tracer particles. 
     ImageSegmentation(processeddirec,analyzeddirec,dperPix, ParticleDiameter)
 
-
+    end
 
 %% PIV Analysis of tracer particles
 if GetMask == 1
@@ -72,7 +72,9 @@ A = dir([processeddirec '\Tracer Particles\R*']); ProcessedRuns{i,1} = {};
     ProcessedRuns{i,1} = sortrows(ProcessedRuns{i})'; NumOfRuns = numel(ProcessedRuns); clear A
 
 for k = 1:NumOfRuns
+    k = 46;
     disp(['Run ' num2str(k) ' of ' num2str(NumOfRuns)])
+  
     [x{k},y{k},u{k},v{k},u_filt{k},v_filt{k}] = Miguel_PIVlab([processeddirec '\Tracer Particles' '\R' num2str(k) ], suffix,Mask);
 clc;
 end

@@ -1,15 +1,15 @@
 %% Directories
 Tnum = 3;
-datdirec = ['D:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['D:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['D:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; 
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-sharpen = 1;
+sharpen = 0;
 
 %% Sharpen image to individual particles are easier to see
 if sharpen == 1
@@ -40,8 +40,8 @@ end
 
 %% Analysis
 
-Threshold = 50000;
-area_lim = 1;
+Threshold = 30000;
+area_lim = [1.1 20];
 dperPix = 6.625277859765377e-06;
 max_disp = 12;
 
@@ -60,7 +60,7 @@ for k = 1:NumOfRuns
 
     if numel(ImageNum)>=7
         m = m+1;
-        [vtracksGas{m},ntracks{m},meanlength{m},rmslength{m},tracksGas{m}] = PredictiveTracker(inputnames,Threshold,max_disp,[],area_lim,0,0);
+        [vtracksGas{k},ntracks{k},meanlength{k},rmslength{k},tracksGas{k}] = PredictiveTracker(inputnames,Threshold,max_disp,[],area_lim,0,0);
     end
 % clc;
 end

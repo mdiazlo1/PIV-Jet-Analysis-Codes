@@ -1,6 +1,6 @@
 %% Directories
-Tnum = 7;
-P0 = 25; %psi
+Tnum = 5;
+P0 = 50; %psi
 Mach = 1;
 datdirec = ['E:\PIV Data\Raw Data\2022_06_28\T' num2str(Tnum)];
 processeddirec = ['E:\PIV Data\Processed Data\2022_06_28\T' num2str(Tnum)];
@@ -23,9 +23,15 @@ end
 
 % Averaging all runs to each other
 avgUFinal = mean(avgURuns,3,'omitnan');
+xgrid = xcal{1}{1}; ygrid = ycal{1}{1};
+newpoints = 100;
+[xq,yq] = meshgrid(linspace(min(min(xgrid(1,:),[],2)),max(max(xgrid(1,:),[],2)),newpoints), ...
+    linspace(min(min(ygrid(:,1),[],1)),max(max(ygrid(:,1),[],1)),newpoints));
 
+avgUFinalInterp = interp2(xgrid,ygrid,avgUFinal,xq,yq,'cubic');
 
-contourf(xcal{1}{1}/D,ycal{1}{1}/D,avgUFinal)
+[contour, h] = contourf(xq/D,yq/D,avgUFinalInterp,30);
+set(h,'edgecolor','none')
 c = colorbar('eastoutside');
 c.Label.String = '$u$ (m/s)';
 c.Label.FontName  = 'Times New roman';
