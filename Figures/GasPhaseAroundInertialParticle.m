@@ -1,8 +1,8 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -16,6 +16,7 @@ dperPix = 6.625277859765377e-06;
 
 load([analyzeddirec '\VelocityAroundInertialParticles.mat'])
 UInertial = UInertial(~cellfun('isempty',UInertial));
+VInertial = VInertial(~cellfun('isempty',VInertial));
 
 
 sizeX = size(UInertial{1}{1,1},1); sizeY = size(UInertial{1}{1,1},2);
@@ -23,17 +24,22 @@ UInertialConcat = zeros(sizeX,sizeY,numel(UInertial));
 m = 0;
 for i = 1: numel(UInertial)
     UInertial{i} = UInertial{i}(~cellfun('isempty',UInertial{i}));
+    VInertial{i} = VInertial{i}(~cellfun('isempty',VInertial{i}));
     for j = 1:size(UInertial{i},1)
         for k = 1:size(UInertial{i},2)
             m = m+1;
-            UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=10) = NaN;
-            
+% %             UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=10) = NaN;
+            UInertial{i}{j,k}(UInertial{i}{j,k}<=0| UInertial{i}{j,k}>=10) = NaN;
+            VInertial{i}{j,k}(VInertial{i}{j,k}<=0 | abs(VInertial{i}{j,k})>=10) = NaN;
+
             UInertialConcat(:,:,m) = UInertial{i}{j,k};
+            VInertialConcat(:,:,m) = VInertial{i}{j,k};
         end
     end
 end
 
 avgUInertial = mean(UInertialConcat,3,'omitnan');
+avgVInertial = mean(VInertialConcat,3,'omitnan');
 
 %% Plotting final contour
 
@@ -74,22 +80,22 @@ saveas(gcf,[analyzeddirec '\Contour Plot'],'svg')
 % 
 % hold off
 %%
-% FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
-% 
-% ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
-% ParticleLocationY = Diameter/2+D_VD*IntWinSize;
-% 
-% [columnsInImage, rowsInImage] = meshgrid(1:FinalImageSizeX, 1:FinalImageSizeY);
-% 
-% circlePixels = (rowsInImage - ParticleLocationY).^2 + (columnsInImage - ParticleLocationX).^2 <= (Diameter/2).^2;
-% % circlePixels = flip(circlePixels,2);
-% 
-% [xgrid,ygrid] = meshgrid(0+IntWinSize/2:IntWinSize:FinalImageSizeX-IntWinSize/2, 0+IntWinSize/2:IntWinSize:FinalImageSizeY-IntWinSize/2);
-% % xgrid = -(xgrid-max(xgrid,[],2));
-% figure
-% imshow(circlePixels)
-% hold on
-% V = zeros(size(avgUInertial,1),size(avgUInertial,2));
-% quiver(xgrid,ygrid,avgUInertial,V)
-% 
-% hold off
+FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
+
+ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
+ParticleLocationY = Diameter/2+D_VD*IntWinSize;
+
+[columnsInImage, rowsInImage] = meshgrid(1:FinalImageSizeX, 1:FinalImageSizeY);
+
+circlePixels = (rowsInImage - ParticleLocationY).^2 + (columnsInImage - ParticleLocationX).^2 <= (Diameter/2).^2;
+% circlePixels = flip(circlePixels,2);
+
+[xgrid,ygrid] = meshgrid(0+IntWinSize/2:IntWinSize:FinalImageSizeX-IntWinSize/2, 0+IntWinSize/2:IntWinSize:FinalImageSizeY-IntWinSize/2);
+% xgrid = -(xgrid-max(xgrid,[],2));
+figure
+imshow(circlePixels)
+hold on
+% avgVInertial = zeros(size(avgUInertial));
+quiver(xgrid,ygrid,avgUInertial,avgVInertial)
+
+hold off

@@ -22,7 +22,7 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'tracksParticleIndex')
 
 %% Setting up settings for interrogation window
 
-IntWinSize = 4; %pixels %Getting the Interrogation window size of the PIV data
+IntWinSize = 8; %pixels %Getting the Interrogation window size of the PIV data
 D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
 D_HR = ceil(96/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
 D_VUP = ceil(32/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4

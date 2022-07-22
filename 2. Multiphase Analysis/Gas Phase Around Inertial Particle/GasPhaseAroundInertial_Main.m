@@ -1,15 +1,15 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-ParticleDiameter = 139e-6;
+ParticleDiameter = 200e-6;
 dperPix = 6.625277859765377e-06;
 
 
@@ -22,7 +22,12 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'tracksParticleIndex')
 %% Setting up settings for interrogation window
 
 IntWinSize = (x{1,1}{1,1}(1,2)-x{1,1}{1,1}(1,1)); %pixels %Getting the Interrogation window size of the PIV data
-IntWinSize = 4;
+IntWinSize = 8;
+% D_HL = ceil(32/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
+% D_HR = ceil(56/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
+% D_VUP = ceil(16/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
+% D_VD = ceil(16/IntWinSize); %Number of interrogation; 8 for intwin 4
+
 D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
 D_HR = ceil(96/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
 D_VUP = ceil(32/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
@@ -43,6 +48,7 @@ for Run = 1:numel(tracksParticleIndex)
 
         ParticleLocationX = tracks{Run}(ParticleNum).X; %Pix
         ParticleLocationY = tracks{Run}(ParticleNum).Y; %Pix
+        ParticleInertialFrame = tracks{Run}(ParticleNum).T;
         ParticleVelocityU = mean(vtracks{Run}(ParticleNum).U)*dperPix*FPS; %m/s
         ParticleVelocityV = mean(vtracks{Run}(ParticleNum).V)*dperPix*FPS; %m/s
 
@@ -52,28 +58,38 @@ for Run = 1:numel(tracksParticleIndex)
         UpperBound = ceil(ParticleLocationY + Diameter/2+D_VUP*IntWinSize);
         LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
 
-        for Frame = 1:numel(ParticleLocationX)
-            if Frame>numel(ucal{Run})
+        for FrameIdx = 1:numel(ParticleLocationX)
+            if ParticleInertialFrame(FrameIdx)>numel(ucal{Run})
                 continue
             end
-            circlePixels = (rowsInImage - ParticleLocationY(Frame)).^2 + (columnsInImage - ParticleLocationX(Frame)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
+            GasFrame = ParticleInertialFrame(FrameIdx);
 
-            [xgrid,ygrid] = meshgrid(LeftBound(Frame)+IntWinSize/2:IntWinSize:RightBound(Frame)-IntWinSize/2 ...
-                , LowerBound(Frame)+IntWinSize/2:IntWinSize:UpperBound(Frame)-IntWinSize/2);
+            circlePixels = (rowsInImage - ParticleLocationY(FrameIdx)).^2 + (columnsInImage - ParticleLocationX(FrameIdx)).^2 <= (Diameter/2).^2; %Creating logical array size of final image with 1's where the particle is and 0's everywhere else
+%             circlePixels = flip(circlePixels,1);
+            [xgrid,ygrid] = meshgrid(LeftBound(FrameIdx)+IntWinSize/2:IntWinSize:RightBound(FrameIdx)-IntWinSize/2 ...
+                , LowerBound(FrameIdx)+IntWinSize/2:IntWinSize:UpperBound(FrameIdx)-IntWinSize/2);
             SumUInertial = zeros(size(xgrid,1),size(xgrid,2));
             SumVInertial = zeros(size(xgrid,1),size(xgrid,2));
             Iterations = zeros(size(xgrid,1),size(xgrid,2));
             WeightScale = zeros(size(xgrid,1),size(xgrid,2));
 
-            for i = 1:size(x{Run}{Frame},2) %loop through all x values of the data grid
-               
-                xdata = x{Run}{Frame}(1,i); %determine x values from data grid
 
-                for j = 1:size(x{Run}{Frame},1) %Loop through all y values of the data grid
-                    ydata = y{Run}{Frame}(j,1); %determine y values from data grid
+            [row, col] = find(x{Run}{FrameIdx} > LeftBound(FrameIdx) & x{Run}{FrameIdx} < RightBound(FrameIdx) ...
+                & y{Run}{FrameIdx} < UpperBound(FrameIdx) & y{Run}{FrameIdx} > LowerBound(FrameIdx));
 
-                    if xdata<max(xgrid(1,:))+IntWinSize/2 && xdata>min(xgrid(1,:))-IntWinSize/2 && ydata<max(ygrid(:,1))+IntWinSize/2 && ydata > min(ygrid(:,1))-IntWinSize/2 %Check to see if the value from data grid is within the region of interest for that inertial particle
+            xGasData = x{Run}{FrameIdx}(min(row):max(row),min(col):max(col));
+            yGasData = y{Run}{FrameIdx}(min(row):max(row),min(col):max(col));
+            uGasData = ucal{Run}{FrameIdx}(min(row):max(row),min(col):max(col));
+            vGasData = vcal{Run}{FrameIdx}(min(row):max(row),min(col):max(col));
+            AverageGasPhaseU = mean(uGasData,'all','omitnan');
+            AverageGasPhaseV = mean(vGasData,'all','omitnan');
+            
+            for i = 1:size(xGasData,2) %loop through all x values of the data grid
+                
+                xdata = xGasData(1,i); %determine x values from data grid
 
+                for j = 1:size(xGasData,1) %Loop through all y values of the data grid
+                    ydata = yGasData(j,1); %determine y values from data grid
                         if ~circlePixels(ydata,xdata) %Ensures that we don't account for data that is within the particle radius of the final grid.
                             UtoAverage = zeros(size(xgrid,1),size(xgrid,2));
                             VtoAverage = zeros(size(xgrid,1),size(xgrid,2));
@@ -86,36 +102,34 @@ for Run = 1:numel(tracksParticleIndex)
                                     if ygrid(p,1) <= 0 || xgrid(1,k)<=0 || ygrid(p,1) > 250 || xgrid(1,k) > 400
                                         continue
                                     end
-                                    if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && ucal{Run}{Frame}(j,i) > 50%Check to see if the data grid box is overlapping with the made up grid box
+                                    if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && ucal{Run}{FrameIdx}(j,i) > 50%Check to see if the data grid box is overlapping with the made up grid box
                                         Xoverlap = IntWinSize - D_H; %obtain the amount of overlap in x distance
                                         Yoverlap = IntWinSize - D_V; %obtain the amount of overlap of in y distance
 
                                         AreaOverlap = Xoverlap*Yoverlap; %Calculate the area of the shaded region
                                         Weight = AreaOverlap/(IntWinSize^2); %Obtain the percentage of the overlap region that makes up the total area of the interogation window this will be our averaging weight
 
-                                        UtoAverage(p,k) = Weight*ucal{Run}{Frame}(j,i)/(ucal{Run}{Frame}(j,i)-ParticleVelocityU); %Applying the weight to the averaging (will be renormalized later using the weight scale variable)
-                                        VtoAverage(p,k) = Weight*vcal{Run}{Frame}(j,i)/(vcal{Run}{Frame}(j,i)-ParticleVelocityV);
+                                        UtoAverage(p,k) = Weight*uGasData(j,i)/abs(AverageGasPhaseU - ParticleVelocityU); %Applying the weight to the averaging (will be renormalized later using the weight scale variable)
+                                        VtoAverage(p,k) = Weight*vGasData(j,i)/abs(AverageGasPhaseU - ParticleVelocityU);
                                         Iterations(p,k) = Iterations(p,k)+1; %Checking how many Iterations was used for summing each individual grid point. Not really necessary since I am already assigning percentage weights but I just like to see it for my own sanity
                                         WeightScale(p,k) = WeightScale(p,k) + Weight; %Checking if the weights of the average add up to 1. If they don't, this will be used to renormalize the data at the end such that it does
                                     end
-                                    %                         end
-
                                 end
 
                             end
                             SumUInertial = SumUInertial + UtoAverage;
                             SumVInertial = SumVInertial + VtoAverage;
                         end
-                    end
+%                     end
 
                 end
             end
 
-            UInertial{Run}{Frame,m} = SumUInertial./WeightScale; %Renormalizing the velocities this is now you average
-            UInertial{Run}{Frame,m}(isnan(UInertial{Run}{Frame,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            UInertial{Run}{FrameIdx,m} = SumUInertial./WeightScale; %Renormalizing the velocities this is now you average
+            UInertial{Run}{FrameIdx,m}(isnan(UInertial{Run}{FrameIdx,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
 
-            VInertial{Run}{Frame,m} = SumVInertial./WeightScale; %Renormalizing the velocities this is now you average
-            VInertial{Run}{Frame,m}(isnan(VInertial{Run}{Frame,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            VInertial{Run}{FrameIdx,m} = SumVInertial./WeightScale; %Renormalizing the velocities this is now you average
+            VInertial{Run}{FrameIdx,m}(isnan(VInertial{Run}{FrameIdx,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
 
         end
     end
