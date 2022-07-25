@@ -19,7 +19,7 @@ UInertial = UInertial(~cellfun('isempty',UInertial));
 VInertial = VInertial(~cellfun('isempty',VInertial));
 
 
-sizeX = size(UInertial{1}{1,1},1); sizeY = size(UInertial{1}{1,1},2);
+sizeX = size(UInertial{1}{2,1},1); sizeY = size(UInertial{1}{2,1},2);
 UInertialConcat = zeros(sizeX,sizeY,numel(UInertial));
 m = 0;
 for i = 1: numel(UInertial)

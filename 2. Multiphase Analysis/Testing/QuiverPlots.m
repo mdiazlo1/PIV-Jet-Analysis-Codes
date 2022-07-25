@@ -56,7 +56,6 @@ hold off
 
 function PlotRectangle(LeftBound,RightBound,UpperBound,LowerBound,xdata,ydata,IntWinSize)
 
-
 xmin = LeftBound;
 xmax = RightBound;
 
