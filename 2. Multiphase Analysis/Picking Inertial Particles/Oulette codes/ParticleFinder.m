@@ -1,4 +1,4 @@
-function [x,y,t,ang] = ParticleFinder(inputnames,threshold,framerange,outputname,bground_name,arealim,invert,noisy)
+function [x,y,t,ang,Radii] = ParticleFinder(inputnames,threshold,framerange,outputname,bground_name,arealim,invert,noisy)
 % Usage: [x,y,t,ang] = ParticleFinder(inputnames,threshold,[framerange],[outputname],[bground_name],[arealim],[invert],[noisy])
 % Given a movie of particle motions, ParticleFinder identifies the
 % particles, returning their positions, times, and orientations in x, y,
@@ -205,13 +205,14 @@ for ii=1:Nf
     if arealim==1
         pos = FindParticles(im,threshold,logs);
     else
-        [pos,ang1] = FindRegions(im,threshold,arealim); % could also keep angle...
+        [pos,ang1,ParticleRadii] = FindRegions(im,threshold,arealim); % could also keep angle...
     end
     N=size(pos,1);
     if ii==1 % if first frame, pre-allocate arrays for speed
         x=NaN(N*Nf,1);
         y=NaN(N*Nf,1);
         t=NaN(N*Nf,1);
+        Radii = NaN(N*Nf,1);
         if arealim~=1
             ang=NaN(N*Nf,1);
         else
@@ -223,6 +224,7 @@ for ii=1:Nf
         x(memloc:memloc+N-1)=pos(:,1);
         y(memloc:memloc+N-1)=pos(:,2);
         t(memloc:memloc+N-1)=tt;
+        Radii(memloc:memloc+N-1) = ParticleRadii;
         if arealim~=1
             ang(memloc:memloc+N-1)=ang1;
         end
@@ -394,7 +396,7 @@ function pos = FindParticles(im, threshold, logs)
 end % function FindParticles
 
 % -=- function FindRegions -=---------------------------------------------
-function [pos,ang] = FindRegions(im,threshold,arealim)
+function [pos,ang,ParticleRadii] = FindRegions(im,threshold,arealim)
 % Given an image "im", FindRegions finds regions that are brighter than
 % "thresold" and have area larger than "arealim". Region centroids are 
 % returned in the two-column array "pos" (with x-coordinates in the first
@@ -408,7 +410,7 @@ function [pos,ang] = FindRegions(im,threshold,arealim)
     s = size(im);
     warnstate=warning('off','MATLAB:divideByZero'); % squelch regionprops divide-by-zero warnings
     props=regionprops(im>threshold,im,'WeightedCentroid','Area', ...
-        'PixelValues','PixelList');
+        'PixelValues','PixelList','MajorAxisLength','MinorAxisLength');
     pos=vertcat(props.WeightedCentroid);
     if numel(pos)>0
         good = pos(:,1)~=1 & pos(:,2)~=1 & pos(:,1)~=s(2) & ...
@@ -418,6 +420,8 @@ function [pos,ang] = FindRegions(im,threshold,arealim)
         props=props(good);
     end
     ang = NaN(size(props));
+    diameters = mean([props.MajorAxisLength props.MinorAxisLength],2);
+    ParticleRadii = diameters/2;
     for ii = 1:numel(ang)
         xy = props(ii).PixelList;
         vals = props(ii).PixelValues;

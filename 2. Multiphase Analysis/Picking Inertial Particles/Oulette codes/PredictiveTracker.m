@@ -85,7 +85,7 @@ if ~exist('noisy','var') || isempty(noisy)
 end
 
 % -=- Find particles in all frames -=-------------------------------------
-[x,y,t,ang]=ParticleFinder(inputnames,threshold,framerange,[], ...
+[x,y,t,ang,ParticleRadii]=ParticleFinder(inputnames,threshold,framerange,[], ...
     bground_name,minarea,invert,0);
 [tt,ends]=unique(t);
 begins=circshift(ends,[1 0])+1;
@@ -104,11 +104,11 @@ if minarea==1
         tracks(ii) = struct('len',1,'X',x(ind(ii)),'Y',y(ind(ii)),'T',1);
     end
 else
-    tracks = repmat(struct('len',[],'X',[],'Y',[],'T',[],'Theta',[]), ...
+    tracks = repmat(struct('len',[],'X',[],'Y',[],'T',[],'Theta',[],'Radii',[]), ...
         nparticles,1);
     for ii = 1:nparticles
         tracks(ii) = struct('len',1,'X',x(ind(ii)),'Y',y(ind(ii)),'T',1, ...
-            'Theta',ang(ind(ii)));
+            'Theta',ang(ind(ii)),'Radii',ParticleRadii(ind(ii)));
     end
 end
 
@@ -196,6 +196,7 @@ for t = 2:Nf
                 tracks(active(ii)).Y(end+1) = fr1(links(ii),2);
                 tracks(active(ii)).len = tracks(active(ii)).len + 1;
                 tracks(active(ii)).T(end+1) = t;
+                tracks(active(ii)).Radii(end+1) = ParticleRadii(active(ii)); 
                 if minarea~=1
                     tracks(active(ii)).Theta(end+1) = ang1(links(ii));
                 end
@@ -215,10 +216,10 @@ for t = 2:Nf
             end
         else
             newtracks = repmat(struct('len',[],'X',[],'Y',[],'T',[], ...
-                'Theta',[]),numel(unmatched),1);
+                'Theta',[],'Radii',[]),numel(unmatched),1);
             for ii = 1:numel(unmatched)
                 newtracks(ii) = struct('len',1,'X',fr1(unmatched(ii),1),...
-                    'Y',fr1(unmatched(ii),2),'T',t,'Theta',ang1(unmatched(ii)));
+                    'Y',fr1(unmatched(ii),2),'T',t,'Theta',ang1(unmatched(ii)),'Radii',ParticleRadii);
             end
         end
     else % if nfr1>0
@@ -263,7 +264,7 @@ if minarea==1
     vtracks = repmat(struct('len',[],'X',[],'Y',[],'T',[],'U',[],'V',[]),ntracks,1);
 else
     vtracks = repmat(struct('len',[],'X',[],'Y',[],'T',[],'U',[], ...
-        'V',[],'Theta',[]),ntracks,1);
+        'V',[],'Theta',[],'Radii',[]),ntracks,1);
 end
 for ii = 1:ntracks
     u = -conv(tracks(ii).X,vkernel,'valid');
@@ -282,7 +283,7 @@ for ii = 1:ntracks
             'T',tracks(ii).T(fitwidth+1:end-fitwidth), ...
             'U',u, ...
             'V',v, ...
-            'Theta',tracks(ii).Theta(fitwidth+1:end-fitwidth));
+            'Theta',tracks(ii).Theta(fitwidth+1:end-fitwidth),'Radii',tracks(ii).Radii(fitwidth+1:end-fitwidth));
     end
 end
 
