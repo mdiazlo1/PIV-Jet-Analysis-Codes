@@ -12,52 +12,72 @@ green_color = '#31a354'; black_color = '#000000';
 ParticleDiameter = 200e-6;
 dperPix = 6.625277859765377e-06;
 
+%Decide if you want to define grid based off of Particle center and grid
+%doesn't change size no matter the particle diameter (particle diameter
+%changes) or if you want to set a constant particle diameter that all of
+%the grids are based off of
+GridType = "Deformable Diameter"; %Options are constant Diameter or deformable diameter
 
+DiameterBuffer = 4; %How many pixels to add to the calculated diameter from regionprops
 %% Load necessary data and obtain Run and Frame numbers
 
 load([analyzeddirec '\LPTData.mat'],'vtracks','tracks')
 load([analyzeddirec '\PIVData.mat'])
-load([analyzeddirec '\InertialParticalSelection.mat'], 'tracksParticleIndex')
+load([analyzeddirec '\InertialParticalSelection.mat'], 'ParticlesOfInterest','avgDiameter')
 
 %% Setting up settings for interrogation window
 
 IntWinSize = (x{1,1}{1,1}(1,2)-x{1,1}{1,1}(1,1)); %pixels %Getting the Interrogation window size of the PIV data
 IntWinSize = 4;
-% D_HL = ceil(32/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
-% D_HR = ceil(56/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
-% D_VUP = ceil(16/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
-% D_VD = ceil(16/IntWinSize); %Number of interrogation; 8 for intwin 4
-
-D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
-D_HR = ceil(56/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
-D_VUP = ceil(32/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
-D_VD = ceil(32/IntWinSize); %Number of interrogation; 8 for intwin 4
-
-Diameter = GetParticleDiameter(ParticleDiameter);
+switch GridType
+    case 'Constant Diameter'
+        D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
+        D_HR = ceil(56/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
+        D_VUP = ceil(32/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
+        D_VD = ceil(32/IntWinSize); %Number of interrogation; 8 for intwin 4
+    case 'Deformable Diameter'
+        
+        D_HL = ceil((28+avgDiameter + DiameterBuffer)/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
+        D_HR = ceil((36+avgDiameter + DiameterBuffer)/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
+        D_VUP = ceil((12+avgDiameter + DiameterBuffer)/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
+        D_VD = ceil((12+avgDiameter + DiameterBuffer)/IntWinSize); %Number of interrogation; 8 for intwin 4
+end
+% Diameter = GetParticleDiameter(ParticleDiameter);
 
 imageSizeX = 400+1; imageSizeY = 250+1;
 [columnsInImage, rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
 
 % Particle Information
-for Run = 1:numel(tracksParticleIndex)
-     disp(['On Run ' num2str(Run) ' of ' num2str(numel(tracksParticleIndex))])
-    for m = 1:numel(tracksParticleIndex{Run})
+for Run = 1:numel(ParticlesOfInterest)
+     disp(['On Run ' num2str(Run) ' of ' num2str(numel(ParticlesOfInterest))])
+    for m = 1:numel(ParticlesOfInterest{Run})
 
 
-        ParticleNum = tracksParticleIndex{Run}(m);
+        ParticleNum = ParticlesOfInterest{Run}.ParticleNum(m);
+        
 
         ParticleLocationX = tracks{Run}(ParticleNum).X; %Pix
         ParticleLocationY = tracks{Run}(ParticleNum).Y; %Pix
         ParticleInertialFrame = tracks{Run}(ParticleNum).T;
         ParticleVelocityU = mean(vtracks{Run}(ParticleNum).U)*dperPix*FPS; %m/s
         ParticleVelocityV = mean(vtracks{Run}(ParticleNum).V)*dperPix*FPS; %m/s
+        
 
         % Setting up bounds for this particle
-        LeftBound = ceil(ParticleLocationX - Diameter/2 - D_HL*IntWinSize);
-        RightBound = ceil(ParticleLocationX + Diameter/2+D_HR*IntWinSize);
-        UpperBound = ceil(ParticleLocationY + Diameter/2+D_VUP*IntWinSize);
-        LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
-
+        switch GridType
+            case 'Constant Diameter'
+                Diameter = avgDiameter+DiameterBuffer; %pix
+                LeftBound = ceil(ParticleLocationX - Diameter/2 - D_HL*IntWinSize);
+                RightBound = ceil(ParticleLocationX + Diameter/2+D_HR*IntWinSize);
+                UpperBound = ceil(ParticleLocationY + Diameter/2+D_VUP*IntWinSize);
+                LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
+            case 'Deformable Diameter'
+                Diameter = ParticlesOfInterest{Run}.ParticleDiameter(m)+DiameterBuffer; %pix
+                LeftBound = ceil(ParticleLocationX - D_HL*IntWinSize);
+                RightBound = ceil(ParticleLocationX+D_HR*IntWinSize);
+                UpperBound = ceil(ParticleLocationY+D_VUP*IntWinSize);
+                LowerBound = ceil(ParticleLocationY - D_VD*IntWinSize);
+        end
         for FrameIdx = 1:numel(ParticleLocationX)
             if ParticleInertialFrame(FrameIdx)>numel(ucal{Run})
                 continue
@@ -135,7 +155,7 @@ for Run = 1:numel(tracksParticleIndex)
         end
     end
 end
-save([analyzeddirec '\VelocityAroundInertialParticles.mat'],'UInertial','VInertial',"IntWinSize","D_HL","D_VD","RightBound","LeftBound","UpperBound","LowerBound","Diameter")
+save([analyzeddirec '\VelocityAroundInertialParticles.mat'],'UInertial','VInertial',"IntWinSize","D_HL","D_VD","RightBound","LeftBound","UpperBound","LowerBound","Diameter",'GridType','DiameterBuffer')
 
 function Diameter = GetParticleDiameter(ParticleDiameter)
 

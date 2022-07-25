@@ -9,12 +9,14 @@ axiswidth = 2; linewidth = 2; fontsize = 18;
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-ParticleDiameter = 139e-6;
+
 dperPix = 6.625277859765377e-06;
 
 %%
 
 load([analyzeddirec '\VelocityAroundInertialParticles.mat'])
+load([analyzeddirec '\InertialParticalSelection.mat'], 'avgDiameter')
+
 UInertial = UInertial(~cellfun('isempty',UInertial));
 VInertial = VInertial(~cellfun('isempty',VInertial));
 
@@ -42,15 +44,10 @@ avgUInertial = mean(UInertialConcat,3,'omitnan');
 avgVInertial = mean(VInertialConcat,3,'omitnan');
 
 %% Plotting final contour
-
+Diameter = avgDiameter;
 FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
 
-ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
-ParticleLocationY = Diameter/2+D_VD*IntWinSize;
 
-[columnsInImage, rowsInImage] = meshgrid(1:FinalImageSizeX, 1:FinalImageSizeY);
-
-circlePixels = (rowsInImage - ParticleLocationY).^2 + (columnsInImage - ParticleLocationX).^2 <= (Diameter/2).^2;
 % circlePixels = flip(circlePixels,2);
 
 [xgrid,ygrid] = meshgrid(0+IntWinSize/2:IntWinSize:FinalImageSizeX-IntWinSize/2, 0+IntWinSize/2:IntWinSize:FinalImageSizeY-IntWinSize/2);
@@ -81,9 +78,17 @@ saveas(gcf,[analyzeddirec '\Contour Plot'],'svg')
 % hold off
 %%
 FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
+Diameter = avgDiameter+DiameterBuffer; %pix
 
-ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
-ParticleLocationY = Diameter/2+D_VD*IntWinSize;
+switch GridType
+    case 'Constant Diameter'
+        
+        ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
+        ParticleLocationY = Diameter/2+D_VD*IntWinSize;
+    case 'Deformable Diameter'
+        ParticleLocationX = D_HL*IntWinSize;
+        ParticleLocationY = D_VD*IntWinSize;
+end
 
 [columnsInImage, rowsInImage] = meshgrid(1:FinalImageSizeX, 1:FinalImageSizeY);
 

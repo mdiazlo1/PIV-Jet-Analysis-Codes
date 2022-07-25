@@ -9,12 +9,13 @@ axiswidth = 2; linewidth = 2; fontsize = 18;
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-ParticleDiameter = 139e-6;
+% ParticleDiameter = 139e-6;
 dperPix = 6.625277859765377e-06;
 
 %%
 
 load([analyzeddirec '\VelocityAroundInertialParticles.mat'])
+load([analyzeddirec '\InertialParticalSelection.mat'],'ParticleOfInterest','avgDiameter')
 
 Run = 1;
 Frame = 2;
@@ -24,7 +25,7 @@ avgUInertial = UInertial{Run}{Frame,ParticleNum};
 avgVInertial = VInertial{Run}{Frame,ParticleNum};
 
 %% Plotting final contour
-
+Diameter = ParticleOfInterest{Run}.ParticleDiameter(ParticleNum);
 FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
 
 ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
@@ -63,6 +64,7 @@ saveas(gcf,[analyzeddirec '\Contour Plot'],'svg')
 % hold off
 %%
 FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
+Diameter = ParticleOfInterest{Run}.ParticleDiameter(ParticleNum);
 
 ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
 ParticleLocationY = Diameter/2+D_VD*IntWinSize;
