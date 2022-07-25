@@ -93,28 +93,37 @@ for Run = 1:numel(tracksParticleIndex)
                         if ~circlePixels(ydata,xdata) %Ensures that we don't account for data that is within the particle radius of the final grid.
                             UtoAverage = zeros(size(xgrid,1),size(xgrid,2));
                             VtoAverage = zeros(size(xgrid,1),size(xgrid,2));
-                            for k = 1:size(xgrid,2) %Loop through the new made up grid x values
-                                D_H = abs(xdata-xgrid(1,k)); %Obtain the horizontal distance between the data x value and the made up grid x value
+                            GridHasBeenAveraged = 0; %This is for the program to keep track of whether (1) or not (0) the grid point I am on has already been averaged onto
+                            %the new grid, there is an if statement below
+                            %where if it has, it breaks out of the loop
 
-                                for p = 1:size(xgrid,1) %Loop through the new made up grid y values
-                                    D_V = abs(ydata - ygrid(p,1)); %Obtain the vertical distance between the data y value and the made up grid y value
-                                 
-                                    if ygrid(p,1) <= 0 || xgrid(1,k)<=0 || ygrid(p,1) > 250 || xgrid(1,k) > 400
-                                        continue
-                                    end
-                                    if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && ucal{Run}{FrameIdx}(j,i) > 50%Check to see if the data grid box is overlapping with the made up grid box
-                                        Xoverlap = IntWinSize - D_H; %obtain the amount of overlap in x distance
-                                        Yoverlap = IntWinSize - D_V; %obtain the amount of overlap of in y distance
 
-                                        AreaOverlap = Xoverlap*Yoverlap; %Calculate the area of the shaded region
-                                        Weight = AreaOverlap/(IntWinSize^2); %Obtain the percentage of the overlap region that makes up the total area of the interogation window this will be our averaging weight
+                            []
 
-                                        UtoAverage(p,k) = Weight*uGasData(j,i)/abs(AverageGasPhaseU - ParticleVelocityU); %Applying the weight to the averaging (will be renormalized later using the weight scale variable)
-                                        VtoAverage(p,k) = Weight*vGasData(j,i)/abs(AverageGasPhaseU - ParticleVelocityU);
-                                        Iterations(p,k) = Iterations(p,k)+1; %Checking how many Iterations was used for summing each individual grid point. Not really necessary since I am already assigning percentage weights but I just like to see it for my own sanity
-                                        WeightScale(p,k) = WeightScale(p,k) + Weight; %Checking if the weights of the average add up to 1. If they don't, this will be used to renormalize the data at the end such that it does
-                                    end
-                                end
+
+%                             for k = 1:size(xgrid,2) %Loop through the new made up grid x values
+%                                 D_H = abs(xdata-xgrid(1,k)); %Obtain the horizontal distance between the data x value and the made up grid x value
+% 
+%                                 for p = 1:size(xgrid,1) %Loop through the new made up grid y values
+%                                     D_V = abs(ydata - ygrid(p,1)); %Obtain the vertical distance between the data y value and the made up grid y value
+%                                  
+%                                     if ygrid(p,1) <= 0 || xgrid(1,k)<=0 || ygrid(p,1) > 250 || xgrid(1,k) > 400
+%                                         continue
+%                                     end
+%                                     if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && ucal{Run}{FrameIdx}(j,i) > 50%Check to see if the data grid box is overlapping with the made up grid box
+%                                         Xoverlap = IntWinSize - D_H; %obtain the amount of overlap in x distance
+%                                         Yoverlap = IntWinSize - D_V; %obtain the amount of overlap of in y distance
+% 
+%                                         AreaOverlap = Xoverlap*Yoverlap; %Calculate the area of the shaded region
+%                                         Weight = AreaOverlap/(IntWinSize^2); %Obtain the percentage of the overlap region that makes up the total area of the interogation window this will be our averaging weight
+% 
+%                                         UtoAverage(p,k) = Weight*uGasData(j,i)/abs(AverageGasPhaseU - ParticleVelocityU); %Applying the weight to the averaging (will be renormalized later using the weight scale variable)
+%                                         VtoAverage(p,k) = Weight*vGasData(j,i)/abs(AverageGasPhaseU - ParticleVelocityU);
+%                                         Iterations(p,k) = Iterations(p,k)+1; %Checking how many Iterations was used for summing each individual grid point. Not really necessary since I am already assigning percentage weights but I just like to see it for my own sanity
+%                                         WeightScale(p,k) = WeightScale(p,k) + Weight; %Checking if the weights of the average add up to 1. If they don't, this will be used to renormalize the data at the end such that it does
+%                                         GridHasBeenAver
+%                                     end
+%                                 end
 
                             end
                             SumUInertial = SumUInertial + UtoAverage;
