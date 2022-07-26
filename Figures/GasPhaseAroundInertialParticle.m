@@ -82,7 +82,6 @@ Diameter = avgDiameter+DiameterBuffer; %pix
 
 switch GridType
     case 'Constant Diameter'
-        
         ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
         ParticleLocationY = Diameter/2+D_VD*IntWinSize;
     case 'Deformable Diameter'
