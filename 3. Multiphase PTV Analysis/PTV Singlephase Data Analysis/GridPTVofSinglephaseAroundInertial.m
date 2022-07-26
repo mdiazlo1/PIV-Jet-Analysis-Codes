@@ -1,57 +1,55 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
-
+datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+addpath(genpath('C:\Users\mxdni\OneDrive - Johns Hopkins\Plume-Surface Interaction Research Group\1. Projects\JET\5. Jet PIV\1. Matlab Codes\1. Newst PIV Code (June 2022)'))
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-ParticleDiameter = 139e-6;
+
 dperPix = 6.625277859765377e-06;
 FPS = 10e6;
-
-
+GridType = "Constant Diameter"; %Options are constant Diameter or deformable diameter
+DiameterBuffer = 4;
 %% Load necessary data and obtain Run and Frame numbers
 
 load([analyzeddirec '\LPTData.mat'],'vtracks','tracks')
 load([analyzeddirec '\PTV_Singlephase.mat'])
-load([analyzeddirec '\InertialParticalSelection.mat'], 'tracksParticleIndex')
+load([analyzeddirec '\InertialParticalSelection.mat'], 'ParticlesOfInterest','avgDiameter')
 
 %% Setting up settings for interrogation window
 
 IntWinSize = 8; %pixels %Getting the Interrogation window size of the PIV data
-D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4
-D_HR = ceil(96/IntWinSize); %Number of interrogation windows to the right; 24 for intwin 4
-D_VUP = ceil(32/IntWinSize); %Number of inerrogation windows above the particle; 8 for intwin 4
-D_VD = ceil(32/IntWinSize); %Number of interrogation; 8 for intwin 4
-% Diameter = ceil(ParticleDiameter/dperPix) + 10;
-Diameter = GetParticleDiameter(ParticleDiameter);
+
+%Set up the ParticleDiam object and put filler numbers for ParticleLocation
+%and Diameter for now
+ParticleDiam = ParticleDiameter(GridType,DiameterBuffer,IntWinSize,avgDiameter,0,0,0);
+
 imageSizeX = 400+1; imageSizeY = 250+1;
 [columnsInImage, rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
 
 % Particle Information
-for Run = 1:numel(tracksParticleIndex)
+for Run = 1:numel(ParticlesOfInterest)
 
-    disp(['On Run ' num2str(Run) ' of ' num2str(numel(tracksParticleIndex))])
-    for m = 1:numel(tracksParticleIndex{Run})
+    disp(['On Run ' num2str(Run) ' of ' num2str(numel(ParticlesOfInterest))])
+    for m = 1:numel(ParticlesOfInterest{Run})
 
 
-        ParticleNum = tracksParticleIndex{Run}(m);
+        ParticleNum = ParticlesOfInterest{Run}.ParticleNum(m);
 
         ParticleLocationX = tracks{Run}(ParticleNum).X; %Pix
         ParticleLocationY = tracks{Run}(ParticleNum).Y; %Pix
         FramesInertial = tracks{Run}(ParticleNum).T;
         ParticleVelocityU = mean(vtracks{Run}(ParticleNum).U)*dperPix*FPS; %m/s
         ParticleVelocityV = mean(vtracks{Run}(ParticleNum).V)*dperPix*FPS; %m/s
-
-        % Setting up bounds for this particle
-        LeftBound = ceil(ParticleLocationX - Diameter/2 - D_HL*IntWinSize);
-        RightBound = ceil(ParticleLocationX + Diameter/2+D_HR*IntWinSize);
-        UpperBound = ceil(ParticleLocationY + Diameter/2+D_VUP*IntWinSize);
-        LowerBound = ceil(ParticleLocationY - Diameter/2 - D_VD*IntWinSize);
+        
+        %Use ParticleDiam object and methods to get bounds around particle
+        ParticleDiam.DiameterOfParticle = ParticlesOfInterest{Run}.ParticleDiameter(m); 
+        ParticleDiam.ParticleLocationX = ParticleLocationX; ParticleDiam.ParticleLocationY = ParticleLocationY;
+        [LeftBound,RightBound,UpperBound,LowerBound,Diameter] = ParticleDiam.GridEdges();
 
         
             
@@ -82,7 +80,7 @@ for Run = 1:numel(tracksParticleIndex)
             VtoAverage = zeros(size(xgrid,1),size(xgrid,2));
 
             for GasTrack = 1:numel(vtracksGas{Run})
-%                 GasTrack = 110;
+
                 GasTrackFrame = vtracksGas{Run}(GasTrack).T;
                 
                 GasFrame = find(GasTrackFrame == FramesInertial(i));
@@ -113,8 +111,8 @@ for Run = 1:numel(tracksParticleIndex)
                     end
                 end
                 
-                UtoAverage(minYIdx,minXIdx) = GasTrackU/(GasTrackU-ParticleVelocityU);
-                VtoAverage(minYIdx,minXIdx) = GasTrackV/(GasTrackV - ParticleVelocityV);
+                UtoAverage(minYIdx,minXIdx) = GasTrackU;
+                VtoAverage(minYIdx,minXIdx) = GasTrackV;
                 Iterations(minYIdx,minXIdx) = Iterations(minYIdx,minXIdx) + 1;
               
                 SumUInertial(minYIdx,minXIdx) = SumUInertial(minYIdx,minXIdx) + UtoAverage(minYIdx,minXIdx);
@@ -122,29 +120,25 @@ for Run = 1:numel(tracksParticleIndex)
                 
 
             end
-            UInertial{Run}{i,m} = SumUInertial./Iterations;
-            UInertial{Run}{i,m}(isnan(UInertial{Run}{i,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            NonNormalUInertial = SumUInertial./Iterations;
+            NonNormalUInertial(NonNormalUInertial<=0) = NaN;
 
-            VInertial{Run}{i,m} = SumVInertial./Iterations; %Renormalizing the velocities this is now you average
-            VInertial{Run}{i,m}(isnan(VInertial{Run}{i,m})) = 0; %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            avgUWindow = mean(NonNormalUInertial,'all','omitnan');
+            UInertial{Run}{i,m} = (NonNormalUInertial-ParticleVelocityU)./(avgUWindow-ParticleVelocityU);
+ 
+            NonNormalVInertial = SumVInertial./Iterations;
+            NonNormalVInertial(NonNormalVInertial<=0) = NaN;
+
+            avgVWindow = mean(NonNormalVInertial,'all','omitnan');
+            VInertial{Run}{i,m} = (NonNormalVInertial-ParticleVelocityV)./(avgVWindow-ParticleVelocityV); %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
         end
 
 
     end
 end
 
-save([analyzeddirec '\PTV_VelocityAroundInertialParticles.mat'], 'UInertial','VInertial',"IntWinSize","D_HL","D_VD","RightBound","LeftBound","UpperBound","LowerBound","Diameter")
+save([analyzeddirec '\PTV_VelocityAroundInertialParticles.mat'], 'UInertial','VInertial',"IntWinSize","RightBound","LeftBound","UpperBound","LowerBound","Diameter")
 
-
-function Diameter = GetParticleDiameter(ParticleDiameter)
-
-if ParticleDiameter == 200e-6
-    Diameter = 60;
-elseif ParticleDiameter == 139e-6
-    Diameter = 45;
-
-end
-end
 
 function [minYIdx,minXIdx] = FindNewMinimum(xgrid,ygrid,GasTrackX,GasTrackY,circlePixels,IntWinSize)
     XDifference = abs(xgrid(1,:)-GasTrackX);

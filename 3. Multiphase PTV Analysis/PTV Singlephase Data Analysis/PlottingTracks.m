@@ -76,13 +76,13 @@ for ii = 1:numel(new_max_vec)
 %     new_im = imlocalbrighten(new_im,0.2); % I did not need this but can
 %     be used to brighten image
     
-    [ParticleTracks] = GetParticleLocations(vtracksGas{Run},ii,ParticleTracks);
+    [ParticleTracks] = GetParticleLocations(tracksGas{Run},ii,ParticleTracks);
     if ParticleTracks == 0
         continue
     end
     imshow(new_im)
     hold on
-    scatter(ParticleTracks(:,1),ParticleTracks(:,2),20,'red','filled')
+    scatter(ParticleTracks(:,1),ParticleTracks(:,2),10,'red','filled')
     hold off
     pause(0.5)
 %     imwrite(new_im,[NewImage_dir 'T' num2str(Tnum) '\R' num2str(Run) '\C2\OverExposed Image\data_' num2str(count) '.tif' ]) % Save new frame
