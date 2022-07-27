@@ -1,8 +1,8 @@
 %% Directories
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -26,8 +26,8 @@ for i = 1: numel(UInertial)
     for j = 1:size(UInertial{i},1)
         for k = 1:size(UInertial{i},2)
             m = m+1;
-            %             UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=1.5) = NaN;
-            UInertial{i}{j,k}(UInertial{i}{j,k}<=0) = NaN;
+            UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=1.6) = NaN;
+%             UInertial{i}{j,k}(UInertial{i}{j,k}<=0) = NaN;
 
             UInertialConcat(:,:,m) = UInertial{i}{j,k};
         end

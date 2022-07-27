@@ -22,7 +22,7 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'ParticlesOfInterest','av
 
 %% Setting up settings for interrogation window
 
-IntWinSize = 8; %pixels %Getting the Interrogation window size of the PIV data
+IntWinSize = 16; %pixels %Getting the Interrogation window size of the PIV data
 
 %Set up the ParticleDiam object and put filler numbers for ParticleLocation
 %and Diameter for now

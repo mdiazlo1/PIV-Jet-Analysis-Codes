@@ -13,8 +13,8 @@ particleDiameter = 137.5e-6;
 dperPix = 6.625277859765377e-06;
 PixelParticleDiameter = particleDiameter/dperPix;
 
-LowerDiameterPixelBuffer = 20;
-UpperDiameterPixelBuffer = 100;
+LowerDiameterPixelBuffer = 0;
+UpperDiameterPixelBuffer = 10;
 
 NeedParticleTracks = 1; %If you need to do lagrangian particle tracking
 NeedParticleStatistics = 1; %If you just need particle centroids and radii
@@ -31,8 +31,9 @@ if NeedParticleTracks
     
     threshold = 65535;
 m = 0;
-
+area_lim1 = 2;
     for i = 1:NumOfRuns
+%         i = 4;
         direc = [processeddirec '\Inertial Particles\R' num2str(i) '\*.tiff'];
 
         A = dir(direc); ImageNum = {};
@@ -41,7 +42,7 @@ m = 0;
 
         if numel(ImageNum)>=7
             m = m+1;
-            [vtracks{i},ntracks,meanlength,rmslength,tracks{i}] = PredictiveTracker(direc,20,10,[],area_lim,0,0);
+            [vtracks{i},ntracks,meanlength,rmslength,tracks{i}] = PredictiveTracker(direc,0.5,5,[],area_lim1,0,0);
         end
 
     end

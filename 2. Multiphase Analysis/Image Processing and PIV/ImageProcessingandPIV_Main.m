@@ -19,7 +19,7 @@ FPS = 10e6; %10 millions frames per second
 % Settings
 Segmentation = 1; %1 = yes, you need segmentation since processed images haven't been generated yet. 0 = No, processed images already generated
 GetMask = 0; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
-ImageProcessing = 0;
+ImageProcessing = 1;
 
 % Obtaining run files
 A = dir(datdirec); Runs = {};

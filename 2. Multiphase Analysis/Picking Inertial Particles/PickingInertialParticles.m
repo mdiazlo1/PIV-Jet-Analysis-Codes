@@ -1,9 +1,9 @@
 %% Directories
 close all
 Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
+processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
+analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
 addpath("Oulette codes\")
 % Plot settings
 axiswidth = 2; linewidth = 2;  fontsize = 12;
@@ -37,8 +37,8 @@ for Run = 1:NumOfRuns
         return
     end
     for i = 1:numel(tracks{Run})
-        Frame = vtracks{Run}(i).T(1);
-        Index = find(tracks{Run}(i).T == Frame);
+        GasFrame = vtracks{Run}(i).T(1);
+        Index = find(tracks{Run}(i).T == GasFrame);
         
         XLocations(i) = tracks{Run}(i).X(Index);
         YLocations(i) = tracks{Run}(i).Y(Index);
