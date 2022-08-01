@@ -1,8 +1,7 @@
 %% Directories
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+Tnum = 3; Run = 1;
+direc = DirectoryAssignment('E:\PIV Data','2022_06_30',Tnum,Run,0);
+[~,~,analyzeddirec] = direc.GeneratePaths();
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -16,7 +15,7 @@ dperPix = 6.625277859765377e-06;
 %doesn't change size no matter the particle diameter (particle diameter
 %changes) or if you want to set a constant particle diameter that all of
 %the grids are based off of
-GridType = "Deformable Diameter"; %Options are constant Diameter or deformable diameter
+GridType = "Constant Diameter"; %Options are constant Diameter or deformable diameter
 
 DiameterBuffer = 4; %How many pixels to add to the calculated diameter from regionprops
 %% Load necessary data and obtain Run and Frame numbers

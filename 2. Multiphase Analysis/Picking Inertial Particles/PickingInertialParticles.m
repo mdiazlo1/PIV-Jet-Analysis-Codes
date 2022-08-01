@@ -1,10 +1,9 @@
 %% Directories
 close all
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
-addpath("Oulette codes\")
+direc = DirectoryAssignment('E:\PIV Data','2022_06_22',3,0,0);
+[datdirec,processeddirec,analyzeddirec] = direc.GeneratePaths();
+
+% addpath("Oulette codes\")
 % Plot settings
 axiswidth = 2; linewidth = 2;  fontsize = 12;
 red_color = '#de2d26'; blue_color = '#756bb1';

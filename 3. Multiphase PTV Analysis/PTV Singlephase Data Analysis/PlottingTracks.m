@@ -1,8 +1,7 @@
 %% Directories
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+direc = DirectoryAssignment('E:\PIV Data','2022_06_23',3,0,0);
+
+[~,processeddirec,analyzeddirec] = direc.GeneratePaths();
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -17,10 +16,10 @@ dperPix = 6.625277859765377e-06;
 
 load([analyzeddirec '\PTV_Singlephase.mat'])
 
-Run = 2;
+Run = 1;
 
 
-inputnames = [processeddirec '\Sharpened Tracer Particles' '\R' num2str(Run)];
+inputnames = [processeddirec '\Inertial Particles' '\R' num2str(Run)];
 A = dir([inputnames '\*.tiff']); Image = {};
 [Image{1:length(A),1}] = A.name;
 Images = sortrows(Image)'; clear A
@@ -76,7 +75,7 @@ for ii = 1:numel(new_max_vec)
 %     new_im = imlocalbrighten(new_im,0.2); % I did not need this but can
 %     be used to brighten image
     
-    [ParticleTracks] = GetParticleLocations(tracksGas{Run},ii,ParticleTracks);
+    [ParticleTracks] = GetParticleLocations(vtracksGas{Run},ii,ParticleTracks);
     if ParticleTracks == 0
         continue
     end

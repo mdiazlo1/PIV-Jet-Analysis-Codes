@@ -23,6 +23,7 @@ VInertial = VInertial(~cellfun('isempty',VInertial));
 
 sizeX = size(UInertial{1}{2,1},1); sizeY = size(UInertial{1}{2,1},2);
 UInertialConcat = zeros(sizeX,sizeY,numel(UInertial));
+VInertialConcat = zeros(sizeX,sizeY,numel(VInertial));
 m = 0;
 for i = 1: numel(UInertial)
     UInertial{i} = UInertial{i}(~cellfun('isempty',UInertial{i}));
@@ -31,8 +32,8 @@ for i = 1: numel(UInertial)
         for k = 1:size(UInertial{i},2)
             m = m+1;
 % %             UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=10) = NaN;
-            UInertial{i}{j,k}(UInertial{i}{j,k}<=0| UInertial{i}{j,k}>=10) = NaN;
-            VInertial{i}{j,k}(VInertial{i}{j,k}<=0 | abs(VInertial{i}{j,k})>=10) = NaN;
+%             UInertial{i}{j,k}(UInertial{i}{j,k}<=0| UInertial{i}{j,k}>=10) = NaN;
+%             VInertial{i}{j,k}(abs(VInertial{i}{j,k})>=10) = NaN;
 
             UInertialConcat(:,:,m) = UInertial{i}{j,k};
             VInertialConcat(:,:,m) = VInertial{i}{j,k};

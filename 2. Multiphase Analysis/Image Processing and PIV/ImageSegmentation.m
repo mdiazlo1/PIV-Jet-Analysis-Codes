@@ -1,8 +1,8 @@
 function ImageSegmentation(processeddirec,analyzeddirec,dperPix,ParticleDiameter)
 
 PixelParticleDiameter = ParticleDiameter/dperPix;
-LowerDiameterPixelBuffer = 0; %pixels
-UpperDiameterPixelBuffer = 100; %pixels
+LowerDiameterPixelBuffer = 2; %pixels
+UpperDiameterPixelBuffer = 200; %pixels
 ParticleSubtractionBuffer = 5; %How much to add to the found particle radius to remove halo of particle
 
 direc = [processeddirec '\HistMatchImages'];
@@ -33,7 +33,7 @@ for i = 1:NumOfRuns
         im_orig = imread([processeddirec '\HistMatchImages\R' num2str(i) filesep Images{j}]);
         
         %First binarize the image
-        im_bin = imbinarize(im_orig,0.95);
+        im_bin = imbinarize(im_orig,0.7);
         im_bin = imfill(im_bin,'holes');%Fill in missing spots
 
         %Find the large particles

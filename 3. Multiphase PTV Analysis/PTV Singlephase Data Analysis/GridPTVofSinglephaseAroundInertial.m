@@ -1,8 +1,8 @@
 %% Directories
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+
+direc = DirectoryAssignment('E:\PIV Data','2022_06_22',3,1,0);
+[~,~,analyzeddirec] = direc.GeneratePaths();
+
 addpath(genpath('C:\Users\mxdni\OneDrive - Johns Hopkins\Plume-Surface Interaction Research Group\1. Projects\JET\5. Jet PIV\1. Matlab Codes\1. Newst PIV Code (June 2022)'))
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -22,10 +22,11 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'ParticlesOfInterest','av
 
 %% Setting up settings for interrogation window
 
-IntWinSize = 16; %pixels %Getting the Interrogation window size of the PIV data
+IntWinSize = 8; %pixels %Getting the Interrogation window size of the PIV data
 
 %Set up the ParticleDiam object and put filler numbers for ParticleLocation
 %and Diameter for now
+avgDiameter = round(36.854); %Overwriting avgDiameter for each date since I am going across multiple dates now. 36.854 is average of all dates for 200 micron particles.
 ParticleDiam = ParticleDiameter(GridType,DiameterBuffer,IntWinSize,avgDiameter,0,0,0);
 
 imageSizeX = 400+1; imageSizeY = 250+1;
@@ -62,16 +63,17 @@ for Run = 1:numel(ParticlesOfInterest)
 
             [xgrid,ygrid] = meshgrid(LeftBound(ParticleFrameIdx)+IntWinSize/2:IntWinSize:RightBound(ParticleFrameIdx)-IntWinSize/2 ...
                 , LowerBound(ParticleFrameIdx)+IntWinSize/2:IntWinSize:UpperBound(ParticleFrameIdx)-IntWinSize/2);
+%             [xgrid,ygrid] = meshgrid(linspace(LeftBound(ParticleFrameIdx)+IntWinSize/2,RightBound(ParticleFrameIdx)-IntWinSize/2,(RightBound(ParticleFrameIdx)-LeftBound(ParticleFrameIdx))/IntWinSize)...
+%                  , linspace(LowerBound(ParticleFrameIdx)+IntWinSize/2,UpperBound(ParticleFrameIdx)-IntWinSize/2,(RightBound(ParticleFrameIdx)-LeftBound(ParticleFrameIdx))/IntWinSize));
 
-            if ygrid(end,1) ~= UpperBound(ParticleFrameIdx)-IntWinSize/2
+            if ygrid(end,1) < UpperBound(ParticleFrameIdx)-IntWinSize/2
                 ygrid(end+1,:) = repmat(UpperBound(ParticleFrameIdx)-IntWinSize/2,size(ygrid,2),1);
-                ygrid(:,end+1) = ygrid(:,1);
+                xgrid(end+1,:) = xgrid(end,:); 
             end
-            if xgrid(1,end) ~= RightBound(ParticleFrameIdx)-IntWinSize/2
+            if xgrid(1,end) < RightBound(ParticleFrameIdx)-IntWinSize/2
                 xgrid(:,end+1) = repmat(RightBound(ParticleFrameIdx)-IntWinSize/2,size(xgrid,1),1);
-                xgrid(end+1,:) = xgrid(1,:);
+                ygrid(:,end+1) = ygrid(:,end);
             end
-
 
             SumUInertial = zeros(size(xgrid,1),size(xgrid,2));
             SumVInertial = zeros(size(xgrid,1),size(xgrid,2));
@@ -100,8 +102,7 @@ for Run = 1:numel(ParticlesOfInterest)
                 [D_H,minXIdx] = min(abs(xgrid(1,:)-GasTrackX)); [D_V,minYIdx] = min(abs(ygrid(:,1)-GasTrackY));
                 %Below if statement is for debugging purposes only
                 if D_H > IntWinSize/2 || D_V > IntWinSize/2
-                    disp(['ERROR: tracer particle' num2str(GasTrack) ' does not fit within an interrogation window'])
-                    return
+                    error(['ERROR: tracer particle' num2str(GasTrack) ' does not fit within an interrogation window'])
                 elseif ygrid(minYIdx,1) <= 0 || xgrid(1,minXIdx)<=0 || ygrid(minYIdx,1) > 250 || xgrid(1,minXIdx) > 400
                     continue
                 elseif circlePixels(ceil(ygrid(minYIdx,1)+1),ceil(xgrid(1,minXIdx)+1))
@@ -130,14 +131,14 @@ for Run = 1:numel(ParticlesOfInterest)
             NonNormalVInertial(NonNormalVInertial<=0) = NaN;
 
             avgVWindow = mean(NonNormalVInertial,'all','omitnan');
-            VInertial{Run}{i,m} = (NonNormalVInertial-ParticleVelocityV)./(avgVWindow-ParticleVelocityV); %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
+            VInertial{Run}{i,m} = (NonNormalVInertial-ParticleVelocityV)./(avgUWindow-ParticleVelocityU); %Center (where particle is) will be NaN since you are dividing by 0 in above line in this region so replace NaN with 0 values
         end
 
 
     end
 end
-
-save([analyzeddirec '\PTV_VelocityAroundInertialParticles.mat'], 'UInertial','VInertial',"IntWinSize","RightBound","LeftBound","UpperBound","LowerBound","Diameter")
+[D_HL,D_HR,D_VUP,D_VD] = ParticleDiam.GridSpacing(); 
+save([analyzeddirec '\PTV_VelocityAroundInertialParticles.mat'], 'UInertial','VInertial',"IntWinSize","D_HL","D_VD","RightBound","LeftBound","UpperBound","LowerBound","Diameter",'GridType','DiameterBuffer','xgrid','ygrid')
 
 
 function [minYIdx,minXIdx] = FindNewMinimum(xgrid,ygrid,GasTrackX,GasTrackY,circlePixels,IntWinSize)

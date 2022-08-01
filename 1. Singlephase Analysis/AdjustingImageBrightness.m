@@ -2,6 +2,7 @@ function AdjustingImageBrightness(datdirec,datadirec,processeddirec)
 j = 0;
 
 for k = 1:numel(datadirec)
+    for m = 1:numel(datadirec{k})
     clc;
     disp('Histogram matching the images')
     disp(['Run ' num2str(k) ' of ' num2str(numel(datadirec))])
@@ -10,7 +11,7 @@ for k = 1:numel(datadirec)
             mkdir([processeddirec '\HistMatchImages' '\R' num2str(j)])
         end
         
-        direc = [datdirec filesep datadirec{k} '\Data Images'];
+        direc = [datdirec filesep 'R' num2str(k) filesep datadirec{k}{m} '\Data Images'];
         A = dir([direc '\*.tiff']); Images = {};
         [Images{1:length(A),1}] = A.name; Images = sortrows(Images); clearvars A
         
@@ -32,15 +33,18 @@ for k = 1:numel(datadirec)
             end
         end
         AdjustedImage = zeros(250,400,'uint16');
+     
         for i = 1:numel(Images)
             if i ~= BrightImageIndex
                 AdjustedImage(:,:,i) = imhistmatch(img(:,:,i),img(:,:,BrightImageIndex));
             else
                 AdjustedImage(:,:,i) = img(:,:,i);
             end
-
+            
             imwrite(AdjustedImage(:,:,i),[processeddirec '\HistMatchImages' '\R' num2str(j) '\data_' sprintf('%03d',i) '.tiff'])
+           
         end 
+    end
 end
 
     

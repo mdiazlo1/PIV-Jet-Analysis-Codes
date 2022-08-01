@@ -1,8 +1,8 @@
 %% Directories
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_07_01\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_07_01\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_07_01\T' num2str(Tnum)];
+
+direc = DirectoryAssignment('E:\PIV Data','2022_06_23',3,0,0);
+[datdirec,processeddirec,analyzeddirec] = direc.GeneratePaths();
+
 
 % Plot settings
 axiswidth = 2; linewidth = 2; 
@@ -12,14 +12,15 @@ green_color = '#31a354'; black_color = '#000000';
 %% Parameters and Settings
 
 % Parameters
-ParticleDiameter = 29.5e-6;
+ParticleDiameter = 200e-6;
 dperPix = 6.625277859765377e-06;
 FPS = 10e6; %10 millions frames per second
 
 % Settings
 Segmentation = 1; %1 = yes, you need segmentation since processed images haven't been generated yet. 0 = No, processed images already generated
-GetMask = 0; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
+GetMask = 1; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
 ImageProcessing = 1;
+EliminateImages = 0;
 
 % Obtaining run files
 A = dir(datdirec); Runs = {};
@@ -28,7 +29,8 @@ Runs(strcmp(Runs,'.'))=[]; Runs(strcmp(Runs,'..'))=[];
 Runs = sortrows(Runs); NumOfRuns = numel(Runs); clear A
 
 for i = 1:NumOfRuns
-    A = dir([datdirec '\R' num2str(i) '\Camera_*']); datadirec{i,1} = {};
+    direc.Run = i; [datdirec,~,~] = direc.GeneratePaths();
+    A = dir([datdirec '\Camera_*']); datadirec{i,1} = {};
     [datadirec{i,1}{1:length(A),1}] = A.name;
     datadirec{i,1}(strcmp(datadirec{i},'.'))=[]; datadirec{i,1}(strcmp(datadirec{i,1},'..'))=[];
     datadirec{i,1} = sortrows(datadirec{i})'; clear A
@@ -39,20 +41,21 @@ end
     % Using imhistmatch to match the histogram of the images and then
     % adjusting the image brightnesses so that they are similar brightness
     % (necessary for PIV)
-%     if EliminateImages == 1
-        EliminateDarkImages(datdirec,datadirec,processeddirec)
-%     end
+    direc.Run = 0; [datdirec,~,~] = direc.GeneratePaths();
+    if EliminateImages == 1
+        EliminateDarkImages(datdirec,datadirec)
+    end
 
 
     %Adjusting brightness of images by matching the histogram of all of the
     %images to the brightest image imhistmatch this function will also
     %create all of the necessary directories for future functions and image
     %processing
-    AdjustingImageBrightness(datdirec,datadirec,processeddirec)
+        AdjustingImageBrightness(datdirec,datadirec,processeddirec)
     
     %This part of the code will segment the images between inertial
     %particles and tracer particles. 
-    ImageSegmentation(processeddirec,analyzeddirec,dperPix, ParticleDiameter)
+        ImageSegmentation(processeddirec,analyzeddirec,dperPix, ParticleDiameter)
 
     end
 
