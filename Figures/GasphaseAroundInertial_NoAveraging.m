@@ -1,4 +1,5 @@
 %% Directories
+clear; close all
 Tnum = 3;
 datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
 processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
@@ -11,18 +12,52 @@ green_color = '#31a354'; black_color = '#000000';
 
 % ParticleDiameter = 139e-6;
 dperPix = 6.625277859765377e-06;
-
+AverageFrames = 1; %Do you want to average over the frames at least
 %%
 
 load([analyzeddirec '\VelocityAroundInertialParticles.mat'])
-load([analyzeddirec '\InertialParticalSelection.mat'],'ParticleOfInterest','avgDiameter')
+load([analyzeddirec '\InertialParticalSelection.mat'],'ParticlesOfInterest','avgDiameter')
+load([analyzeddirec '\LPTData.mat'],'vtracks','tracks')
 
-Run = 1;
-Frame = 2;
+ParticleOfInterest = ParticlesOfInterest;
+Run = 4;
+Frame = 4;
 ParticleNum = 1;
 
-avgUInertial = UInertial{Run}{Frame,ParticleNum};
-avgVInertial = VInertial{Run}{Frame,ParticleNum};
+if AverageFrames == 1
+
+    UConcat = zeros(size(UInertial{Run}{Frame,ParticleNum},1),size(UInertial{Run}{Frame,ParticleNum},2),size(UInertial{Run},1));
+    VConcat = zeros(size(UConcat));
+    m = 0;
+    for Frames = 1:size(UInertial{Run},1)
+        if isempty(UInertial{Run}{Frames,ParticleNum})
+            continue
+        end
+        m = m + 1;
+        UConcat(:,:,m) = UInertial{Run}{Frames,ParticleNum};
+        VConcat(:,:,m) = VInertial{Run}{Frames,ParticleNum};
+    end
+    avgUInertial = mean(UConcat,3,'omitnan');
+    avgVInertial = mean(VConcat,3,'omitnan');
+else
+    avgUInertial = UInertial{Run}{Frame,ParticleNum};
+    avgVInertial = VInertial{Run}{Frame,ParticleNum};
+end
+
+avgUInertial(avgUInertial<=0) = NaN;
+
+
+%% Plot Image with particle position so we know which we are looking at
+ParticleLocationRealX = vtracks{Run}(ParticlesOfInterest{Run}.ParticleNum(ParticleNum)).X;
+ParticleLocationRealY = vtracks{Run}(ParticlesOfInterest{Run}.ParticleNum(ParticleNum)).Y;
+
+img = imread([processeddirec '\Tracer Particles\R' num2str(Run) '\data_' sprintf('%03d',Frame) '.tiff']);
+figure
+imshow(img)
+hold on
+scatter(ParticleLocationRealX, ParticleLocationRealY, 30, 'blue','filled')
+hold off
+
 
 %% Plotting final contour
 Diameter = ParticleOfInterest{Run}.ParticleDiameter(ParticleNum);
@@ -30,6 +65,7 @@ FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
 
 ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
 ParticleLocationY = Diameter/2+D_VD*IntWinSize;
+
 
 [columnsInImage, rowsInImage] = meshgrid(1:FinalImageSizeX, 1:FinalImageSizeY);
 
@@ -64,10 +100,17 @@ saveas(gcf,[analyzeddirec '\Contour Plot'],'svg')
 % hold off
 %%
 FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
-Diameter = ParticleOfInterest{Run}.ParticleDiameter(ParticleNum);
+% Diameter = avgDiameter+DiameterBuffer; %pix
+Diameter = avgDiameter;
 
-ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
-ParticleLocationY = Diameter/2+D_VD*IntWinSize;
+switch GridType
+    case 'Constant Diameter'
+        ParticleLocationX = Diameter/2 + D_HL*IntWinSize;
+        ParticleLocationY = Diameter/2+D_VD*IntWinSize;
+    case 'Deformable Diameter'
+        ParticleLocationX = D_HL*IntWinSize;
+        ParticleLocationY = D_VD*IntWinSize;
+end
 
 [columnsInImage, rowsInImage] = meshgrid(1:FinalImageSizeX, 1:FinalImageSizeY);
 
@@ -76,10 +119,11 @@ circlePixels = (rowsInImage - ParticleLocationY).^2 + (columnsInImage - Particle
 
 [xgrid,ygrid] = meshgrid(0+IntWinSize/2:IntWinSize:FinalImageSizeX-IntWinSize/2, 0+IntWinSize/2:IntWinSize:FinalImageSizeY-IntWinSize/2);
 % xgrid = -(xgrid-max(xgrid,[],2));
+
 figure
 imshow(circlePixels)
 hold on
 % avgVInertial = zeros(size(avgUInertial));
-quiver(xgrid,ygrid,avgUInertial,avgVInertial)
-
+quiver(xgrid,ygrid,avgUInertial,avgVInertial);
+set(gcf,'Position',[59,367.6666666666666,1280,800])
 hold off

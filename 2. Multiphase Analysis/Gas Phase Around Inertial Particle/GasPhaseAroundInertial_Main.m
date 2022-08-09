@@ -15,7 +15,7 @@ dperPix = 6.625277859765377e-06;
 %doesn't change size no matter the particle diameter (particle diameter
 %changes) or if you want to set a constant particle diameter that all of
 %the grids are based off of
-GridType = "Constant Diameter"; %Options are constant Diameter or deformable diameter
+GridType = "Deformable Diameter"; %Options are constant Diameter or deformable diameter
 
 DiameterBuffer = 4; %How many pixels to add to the calculated diameter from regionprops
 %% Load necessary data and obtain Run and Frame numbers
@@ -49,7 +49,10 @@ imageSizeX = 400+1; imageSizeY = 250+1;
 % Particle Information
 for Run = 1:numel(ParticlesOfInterest)
      disp(['On Run ' num2str(Run) ' of ' num2str(numel(ParticlesOfInterest))])
-    for m = 1:numel(ParticlesOfInterest{Run})
+    if isempty(ParticlesOfInterest{Run})
+        continue
+    end
+    for m = 1:numel(ParticlesOfInterest{Run}.ParticleNum)
 
 
         ParticleNum = ParticlesOfInterest{Run}.ParticleNum(m);

@@ -26,12 +26,16 @@ UInertialConcat = zeros(sizeX,sizeY,numel(UInertial));
 VInertialConcat = zeros(sizeX,sizeY,numel(VInertial));
 m = 0;
 for i = 1: numel(UInertial)
-    UInertial{i} = UInertial{i}(~cellfun('isempty',UInertial{i}));
-    VInertial{i} = VInertial{i}(~cellfun('isempty',VInertial{i}));
+%     UInertial{i} = UInertial{i}(~cellfun('isempty',UInertial{i}));
+%     VInertial{i} = VInertial{i}(~cellfun('isempty',VInertial{i}));
+    
     for j = 1:size(UInertial{i},1)
         for k = 1:size(UInertial{i},2)
+            if isempty(UInertial{i}{j,k})
+                continue
+            end
             m = m+1;
-% %             UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=10) = NaN;
+            UInertial{i}{j,k}(UInertial{i}{j,k}<=0 | UInertial{i}{j,k}>=10) = NaN;
 %             UInertial{i}{j,k}(UInertial{i}{j,k}<=0| UInertial{i}{j,k}>=10) = NaN;
 %             VInertial{i}{j,k}(abs(VInertial{i}{j,k})>=10) = NaN;
 
@@ -55,9 +59,10 @@ FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
 % xgrid = -(xgrid-max(xgrid,[],2));
 
 figure
+
 contourf(xgrid,ygrid,avgUInertial,10)
 c = colorbar('eastoutside');
-c.Label.String = '$u$ (m/s)';
+c.Label.String = '$\Delta u / \Delta u_{avg}$ ';
 c.Label.FontName  = 'Times New roman';
 c.Label.FontSize = 30;
 c.Label.FontAngle = 'italic';
@@ -69,7 +74,7 @@ ylabel('$y/D$','fontsize',30,'fontname','Times New Roman','fontangle','italic','
 xlabel('$x/D$','fontsize',30,'fontname','Times New Roman','fontangle','italic','interpreter','latex');
 
 
-set(gcf,'Position',[100 100 1280 762])
+set(gcf,'Position',[59,367.6666666666666,1280,800])
 
 saveas(gcf,[analyzeddirec '\Contour Plot'],'svg')
 % hold on
@@ -79,7 +84,8 @@ saveas(gcf,[analyzeddirec '\Contour Plot'],'svg')
 % hold off
 %%
 FinalImageSizeX = RightBound-LeftBound; FinalImageSizeY = UpperBound-LowerBound;
-Diameter = avgDiameter+DiameterBuffer; %pix
+% Diameter = avgDiameter+DiameterBuffer; %pix
+Diameter = avgDiameter;
 
 switch GridType
     case 'Constant Diameter'
@@ -97,10 +103,11 @@ circlePixels = (rowsInImage - ParticleLocationY).^2 + (columnsInImage - Particle
 
 [xgrid,ygrid] = meshgrid(0+IntWinSize/2:IntWinSize:FinalImageSizeX-IntWinSize/2, 0+IntWinSize/2:IntWinSize:FinalImageSizeY-IntWinSize/2);
 % xgrid = -(xgrid-max(xgrid,[],2));
+
 figure
 imshow(circlePixels)
 hold on
 % avgVInertial = zeros(size(avgUInertial));
-quiver(xgrid,ygrid,avgUInertial,avgVInertial)
-
+quiver(xgrid,ygrid,avgUInertial,avgVInertial);
+set(gcf,'Position',[59,367.6666666666666,1280,800])
 hold off

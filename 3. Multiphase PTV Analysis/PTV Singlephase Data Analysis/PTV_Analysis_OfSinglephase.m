@@ -1,5 +1,5 @@
 %% Directories
-direc = DirectoryAssignment('E:\PIV Data','2022_06_22',3,0,0);
+direc = DirectoryAssignment('E:\PIV Data','2022_07_01',3,0,0);
 
 [~,processeddirec,analyzeddirec] = direc.GeneratePaths();
 
@@ -9,7 +9,7 @@ red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
 sharpen = 1;
-binarize = 0;
+binarize = 1;
 adjustlow = 0.2;
 %% Sharpen image to individual particles are easier to see
 if sharpen == 1
@@ -38,11 +38,11 @@ if sharpen == 1
 end
 
 if binarize == 1
-        A = dir([processeddirec '\Tracer Particles\R*']); ProcessedRuns = {};
+        A = dir([processeddirec '\Sharpened Tracer Particles\R*']); ProcessedRuns = {};
     [ProcessedRuns{1:length(A),1}] = A.name;
     ProcessedRuns = sortrows(ProcessedRuns)'; NumOfRuns = numel(ProcessedRuns); clear A
     for k = 1:NumOfRuns
-        inputnames = [processeddirec '\Tracer Particles' '\R' num2str(k)];
+        inputnames = [processeddirec '\Sharpened Tracer Particles' '\R' num2str(k)];
         A = dir([inputnames '\*.tiff']); Image = {};
         [Image{1:length(A),1}] = A.name;
         Images = sortrows(Image)'; clear A
@@ -59,7 +59,7 @@ if binarize == 1
                 mkdir([processeddirec '\AdaptBinarize Sharpen Tracers\R' num2str(k)])
             end
         
-
+            im_bin2 = uint16(im_bin2.*2.^16);
             imwrite(im_bin2,[processeddirec '\AdaptBinarize Sharpen Tracers\R' num2str(k) filesep Images{i}])
         end
     end
@@ -70,11 +70,11 @@ end
 Threshold = 40000;
 area_lim = [2 30];
 dperPix = 6.625277859765377e-06;
-max_disp = 10;
+max_disp = 12;
 
 addpath('.\Oulette codes\')
 suffix = '*.tiff';
-A = dir([processeddirec '\Sharpened Tracer Particles\R*']); ProcessedRuns = {};
+A = dir([processeddirec '\AdaptBinarize Sharpen Tracers\R*']); ProcessedRuns = {};
     [ProcessedRuns{1:length(A),1}] = A.name;
     ProcessedRuns = sortrows(ProcessedRuns)'; NumOfRuns = numel(ProcessedRuns); clear A
 m = 0;

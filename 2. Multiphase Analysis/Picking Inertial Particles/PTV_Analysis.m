@@ -1,5 +1,5 @@
 %% Directories
-direc = DirectoryAssignment('E:\PIV Data','2022_06_23',3,0,0);
+direc = DirectoryAssignment('E:\PIV Data','2022_07_01',3,0,0);
 
 [~,processeddirec,analyzeddirec] = direc.GeneratePaths();
 
@@ -35,7 +35,6 @@ if NeedParticleTracks
 m = 0;
 area_lim1 = 2;
     for i = 1:NumOfRuns
-%         i = 4;
         direc = [processeddirec '\Inertial Particles\R' num2str(i) '\*.tiff'];
 
         A = dir(direc); ImageNum = {};

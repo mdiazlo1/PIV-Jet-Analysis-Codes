@@ -1,5 +1,5 @@
 %% Directories
-direc = DirectoryAssignment('E:\PIV Data','2022_06_23',3,0,0);
+direc = DirectoryAssignment('E:\PIV Data','2022_07_01',3,0,0);
 
 [~,processeddirec,analyzeddirec] = direc.GeneratePaths();
 
@@ -25,7 +25,7 @@ A = dir([inputnames '\*.tiff']); Image = {};
 Images = sortrows(Image)'; clear A
 
 for i = 1:numel(Images)
-    Img(:,:,i) = imread([inputnames '\' Images{i}]);
+    Img(:,:,i) = imread([inputnames '\' Images{i}]).*2.^8;
 end
 
 
@@ -75,7 +75,7 @@ for ii = 1:numel(new_max_vec)
 %     new_im = imlocalbrighten(new_im,0.2); % I did not need this but can
 %     be used to brighten image
     
-    [ParticleTracks] = GetParticleLocations(vtracksGas{Run},ii,ParticleTracks);
+    [ParticleTracks] = GetParticleLocations(tracksGas{Run},ii,ParticleTracks);
     if ParticleTracks == 0
         continue
     end
