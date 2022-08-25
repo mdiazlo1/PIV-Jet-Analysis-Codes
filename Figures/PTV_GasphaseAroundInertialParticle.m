@@ -2,7 +2,7 @@
 Dates = ['2022_06_22';'2022_06_23';'2022_06_30']; Tnum = [3 3 3]; Run = 0;
 for p = 1:size(Dates,1)
 
-    direc = DirectoryAssignment('E:\PIV Data',Dates(p,:),Tnum(p),Run,0);
+    direc = DirectoryAssignment('D:\PIV Data',Dates(p,:),Tnum(p),Run,0);
     [~,~,analyzeddirec] = direc.GeneratePaths();
 
     % Plot settings

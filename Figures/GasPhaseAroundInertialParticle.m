@@ -1,8 +1,7 @@
 %% Directories
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+Tnum = 4; Run = 1;
+direc = DirectoryAssignment('E:\PIV Data','2022_06_27',Tnum,Run,0);
+[~,~,analyzeddirec] = direc.GeneratePaths();
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;

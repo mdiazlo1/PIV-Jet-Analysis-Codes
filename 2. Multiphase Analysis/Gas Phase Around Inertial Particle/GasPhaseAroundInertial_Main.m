@@ -1,6 +1,6 @@
 %% Directories
-Tnum = 3; Run = 1;
-direc = DirectoryAssignment('E:\PIV Data','2022_06_30',Tnum,Run,0);
+Tnum = 4; Run = 1;
+direc = DirectoryAssignment('D:\PIV Data','2022_06_27',Tnum,Run,0);
 [~,~,analyzeddirec] = direc.GeneratePaths();
 
 % Plot settings
@@ -15,9 +15,9 @@ dperPix = 6.625277859765377e-06;
 %doesn't change size no matter the particle diameter (particle diameter
 %changes) or if you want to set a constant particle diameter that all of
 %the grids are based off of
-GridType = "Deformable Diameter"; %Options are constant Diameter or deformable diameter
+GridType = "Constant Diameter"; %Options are constant Diameter or deformable diameter
 
-DiameterBuffer = 4; %How many pixels to add to the calculated diameter from regionprops
+DiameterBuffer = 2; %How many pixels to add to the calculated diameter from regionprops
 %% Load necessary data and obtain Run and Frame numbers
 
 load([analyzeddirec '\LPTData.mat'],'vtracks','tracks')
@@ -97,8 +97,8 @@ for Run = 1:numel(ParticlesOfInterest)
             WeightScale = zeros(size(xgrid,1),size(xgrid,2));
 
 
-            [row, col] = find(x{Run}{GasFrame} > LeftBound(FrameIdx) & x{Run}{GasFrame} < RightBound(FrameIdx) ...
-                & y{Run}{GasFrame} < UpperBound(FrameIdx) & y{Run}{GasFrame} > LowerBound(FrameIdx));
+            [row, col] = find(x{Run}{GasFrame} > LeftBound(FrameIdx)-IntWinSize & x{Run}{GasFrame} < RightBound(FrameIdx)+IntWinSize ...
+                & y{Run}{GasFrame} < UpperBound(FrameIdx)+IntWinSize & y{Run}{GasFrame} > LowerBound(FrameIdx)-IntWinSize);
 
             xGasData = x{Run}{GasFrame}(min(row):max(row),min(col):max(col));
             yGasData = y{Run}{GasFrame}(min(row):max(row),min(col):max(col));
@@ -125,7 +125,7 @@ for Run = 1:numel(ParticlesOfInterest)
                                     if ygrid(p,1) <= 0 || xgrid(1,k)<=0 || ygrid(p,1) > 250 || xgrid(1,k) > 400
                                         continue
                                     end
-                                    if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && uGasData(j,i) > 0%Check to see if the data grid box is overlapping with the made up grid box
+                                    if D_H < IntWinSize && D_V < IntWinSize &&  ~circlePixels(ygrid(p,1),xgrid(1,k)) && uGasData(j,i) > 50%Check to see if the data grid box is overlapping with the made up grid box
                                         Xoverlap = IntWinSize - D_H; %obtain the amount of overlap in x distance
                                         Yoverlap = IntWinSize - D_V; %obtain the amount of overlap of in y distance
 

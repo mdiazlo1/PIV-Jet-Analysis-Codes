@@ -1,6 +1,6 @@
 %% Directories
 close all
-direc = DirectoryAssignment('E:\PIV Data','2022_06_22',3,0,0);
+direc = DirectoryAssignment('D:\PIV Data','2022_06_27',4,0,0);
 [datdirec,processeddirec,analyzeddirec] = direc.GeneratePaths();
 
 % addpath("Oulette codes\")
@@ -15,10 +15,10 @@ green_color = '#31a354'; black_color = '#000000';
 %% Plotting raw image with found LPT track for each run
 % load([analyzeddirec '\ParticleStats.mat'])
 load([analyzeddirec '\LPTData.mat'])
-XData = cell(1,NumOfRuns); YData = cell(1,NumOfRuns);
-tracksParticleIndex = cell(1,NumOfRuns);
+XData = cell(1,numel(tracks)); YData = cell(1,numel(tracks));
+tracksParticleIndex = cell(1,numel(tracks));
 Frame = 2;
-for Run = 1:NumOfRuns
+for Run = 1:numel(tracks)
     disp(['On Run = ' num2str(Run) ' of ' num2str(NumOfRuns)])
 
     
@@ -55,7 +55,7 @@ for Run = 1:NumOfRuns
     
     title("Hold shift and select all particles of interest then close the window to finish",'FontName','Times New Roman')
     PrettyFigures(linewidth,fontsize,axiswidth)
-    hFig.Position = [519,233,1.5e+03,10e+02];
+%     hFig.Position = [519,233,1.5e+03,10e+02];
 
     [XData{Run},YData{Run}] = DataPicker(hFig,hPlot);
     im_bin = imbinarize(tempInertial);

@@ -1,9 +1,9 @@
 %% Directories
 
-direc = DirectoryAssignment('E:\PIV Data','2022_06_22',3,1,0);
+direc = DirectoryAssignment('D:\PIV Data','2022_06_23',3,1,0);
 [~,~,analyzeddirec] = direc.GeneratePaths();
 
-addpath(genpath('C:\Users\mxdni\OneDrive - Johns Hopkins\Plume-Surface Interaction Research Group\1. Projects\JET\5. Jet PIV\1. Matlab Codes\1. Newst PIV Code (June 2022)'))
+addpath(genpath('..\..'))
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
 red_color = '#de2d26'; blue_color = '#756bb1';
@@ -36,7 +36,10 @@ imageSizeX = 400+1; imageSizeY = 250+1;
 for Run = 1:numel(ParticlesOfInterest)
 
     disp(['On Run ' num2str(Run) ' of ' num2str(numel(ParticlesOfInterest))])
-    for m = 1:numel(ParticlesOfInterest{Run})
+    if isempty(ParticlesOfInterest{Run})
+        continue
+    end
+    for m = 1:numel(ParticlesOfInterest{Run}.ParticleNum)
 
 
         ParticleNum = ParticlesOfInterest{Run}.ParticleNum(m);

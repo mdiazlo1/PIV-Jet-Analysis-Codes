@@ -1,9 +1,9 @@
 %% Directories
 clear; close all
-Tnum = 3;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_30\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_30\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_30\T' num2str(Tnum)];
+Tnum = 4;
+datdirec = ['D:\PIV Data\Raw Data\2022_06_27\T' num2str(Tnum)];
+processeddirec = ['D:\PIV Data\Processed Data\2022_06_27\T' num2str(Tnum)];
+analyzeddirec = ['D:\PIV Data\Analyzed Results\2022_06_27\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; fontsize = 18;
@@ -20,7 +20,7 @@ load([analyzeddirec '\InertialParticalSelection.mat'],'ParticlesOfInterest','avg
 load([analyzeddirec '\LPTData.mat'],'vtracks','tracks')
 
 ParticleOfInterest = ParticlesOfInterest;
-Run = 4;
+Run = 1;
 Frame = 4;
 ParticleNum = 1;
 
