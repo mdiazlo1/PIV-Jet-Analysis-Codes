@@ -1,0 +1,12 @@
+Particles with Wakes in 2022_06_30 T3 data
+Run 7, 10, 32
+
+Particles with Wakes in 2022_06_30 T4 data
+Run 20 kinda, run 23 kinda, 24 kinda, 30 kinda
+
+Particle with Wakes in 2022_07_01 T3 data
+Run 3 close to boundary, 10 kinda, 12 kinda twice, 17 kinda, 24, 43 kinda, 45 kinda close to edge, run 49 kinda, 50 kinda, 51 kinda, 
+
+
+Particles with Wakes in 2022_06_27 T3 data
+Run 24 kinda
