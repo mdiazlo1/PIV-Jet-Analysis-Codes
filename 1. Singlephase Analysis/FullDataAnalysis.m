@@ -1,8 +1,8 @@
 %% Directories
 Tnum = 7;
-datdirec = ['E:\PIV Data\Raw Data\2022_06_28\T' num2str(Tnum)];
-processeddirec = ['E:\PIV Data\Processed Data\2022_06_28\T' num2str(Tnum)];
-analyzeddirec = ['E:\PIV Data\Analyzed Results\2022_06_28\T' num2str(Tnum)];
+datdirec = ['D:\PIV Data\Raw Data\2022_06_28\T' num2str(Tnum)];
+processeddirec = ['D:\PIV Data\Processed Data\2022_06_28\T' num2str(Tnum)];
+analyzeddirec = ['D:\PIV Data\Analyzed Results\2022_06_28\T' num2str(Tnum)];
 
 % Plot settings
 axiswidth = 2; linewidth = 2; 
@@ -17,8 +17,8 @@ FPS = 10e6; %10 millions frames per second
 
 % Settings
 GetMask = 0; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
-Eliminateimages = 1; %if you still need to eliminate dark images
-AdjustImageBrightness = 1;
+Eliminateimages = 0; %if you still need to eliminate dark images
+AdjustImageBrightness = 0;
 
 
 % Obtaining run files
@@ -50,10 +50,9 @@ datadirec = Runs;
 if GetMask == 1
     Mask = DetermineMask([processeddirec '\HistMatchImages']);
     return
+else
+    Mask = [];
 end
-% else
-%     Mask = [];
-% end
 
 % addpath('.\PIVlab')
 suffix = '*.tiff';
