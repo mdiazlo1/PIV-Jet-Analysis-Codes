@@ -1,5 +1,5 @@
 %% Directories
-direc = DirectoryAssignment('D:\PIV Data','2022_06_27',4,0,0);
+direc = DirectoryAssignment('E:\PIV Data','2022_06_27',3,0,0);
 
 [~,processeddirec,analyzeddirec] = direc.GeneratePaths();
 
@@ -9,13 +9,17 @@ axiswidth = 2; linewidth = 2;
 red_color = '#de2d26'; blue_color = '#756bb1';
 green_color = '#31a354'; black_color = '#000000';
 
-particleDiameter = 200e-6;
+particleDiameter = 137.5e-6;
+
+
 dperPix = 6.625277859765377e-06;
+FPS = 10e6;
+ParticleDensity = 2500; 
 PixelParticleDiameter = particleDiameter/dperPix;
 
 LowerDiameterPixelBuffer = 2;
 UpperDiameterPixelBuffer = 200;
-
+TestimFindCircles = 0;
 NeedParticleTracks = 1; %If you need to do lagrangian particle tracking
 NeedParticleStatistics = 1; %If you just need particle centroids and radii
 %% Setting Parameters
@@ -34,7 +38,10 @@ if NeedParticleTracks
     threshold = 65535;
 m = 0;
 area_lim1 = 2;
-    for i = 13:NumOfRuns
+ParticleMassFlow = zeros(1,NumOfRuns); ParticleNumConc = zeros(1,NumOfRuns);
+CenterSave = cell(1,NumOfRuns);
+
+    for i = 1:NumOfRuns
         direc = [processeddirec '\Inertial Particles\R' num2str(i) '\*.tiff'];
 
         A = dir(direc); ImageNum = {};
@@ -44,12 +51,31 @@ area_lim1 = 2;
         if numel(ImageNum)>=7
             m = m+1;
             [vtracks{i},ntracks,meanlength,rmslength,tracks{i}] = PredictiveTracker(direc,0.5,5,[],area_lim1,0,0);
+            ParticleNum = zeros(1,numel(ImageNum)); centers = cell(1,numel(ImageNum));
+            for j = 1:numel(ImageNum)
+                
+                direcIm = [processeddirec '\HistMatchImages\R' num2str(i) '\data_' sprintf('%03d',j) '.tiff'];
+                im_bin = imread(direcIm)>0.7*2^16;
+                [centers{j}, radii] = imfindcircles(im_bin,[10 35],'Sensitivity',0.9);
+                ParticleNum(j) = length(centers{j}(centers{j}(:,1)>15));
+               
+                if TestimFindCircles
+                    figure
+                    imshow(im_bin)
+                    hold on
+                    viscircles(centers{j}, radii,'Color','b');
+                    pause
+                end
+            end
+            [ParticleNumConc(i),idx] = max(ParticleNum);
+            
+            CenterSave{i} = centers{idx};
         end
-
+        
     end
-
-
-    save([analyzeddirec '\LPTData.mat'],"vtracks","tracks")
+    
+    
+    save([analyzeddirec '\LPTData.mat'],"vtracks","tracks","ParticleNumConc",'CenterSave')
 end
 %% Plotting Particle centroids found by Oullette's code with Binary images
 % if NeedParticleStatistics
