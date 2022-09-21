@@ -1,6 +1,6 @@
 %% Directories
-Tnum = 4; Run = 1;
-direc = DirectoryAssignment('D:\PIV Data','2022_06_27',Tnum,Run,0);
+Tnum = 3; Run = 1;
+direc = DirectoryAssignment('E:\PIV Data','2022_06_30',Tnum,Run,0);
 [~,~,analyzeddirec] = direc.GeneratePaths();
 
 % Plot settings
@@ -27,7 +27,7 @@ load([analyzeddirec '\InertialParticalSelection.mat'], 'ParticlesOfInterest','av
 %% Setting up settings for interrogation window
 
 IntWinSize = (x{1,1}{1,1}(1,2)-x{1,1}{1,1}(1,1)); %pixels %Getting the Interrogation window size of the PIV data
-IntWinSize = 4;
+IntWinSize = 8;
 switch GridType
     case 'Constant Diameter'
         D_HL = ceil(48/IntWinSize);%Number of interrogation windows to the left; 12 for intwin 4

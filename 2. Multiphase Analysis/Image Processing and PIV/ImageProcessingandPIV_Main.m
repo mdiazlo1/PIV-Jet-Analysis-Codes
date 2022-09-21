@@ -1,8 +1,8 @@
 %% Directories
 
-direc = DirectoryAssignment('E:\PIV Data','2022_06_23',3,0,0);
+direc = DirectoryAssignment('E:\PIV Data','2022_06_30',3,0,0);
 [datdirec,processeddirec,analyzeddirec] = direc.GeneratePaths();
-
+addpath(genpath('..\..'))
 
 % Plot settings
 axiswidth = 2; linewidth = 2; 
@@ -18,8 +18,8 @@ FPS = 10e6; %10 millions frames per second
 
 % Settings
 Segmentation = 1; %1 = yes, you need segmentation since processed images haven't been generated yet. 0 = No, processed images already generated
-GetMask = 1; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
-ImageProcessing = 1;
+GetMask = 0; %1 = yes, you still need to find the Mask, 0 = no, you dont need to get the mask again it's already set
+ImageProcessing = 0;
 EliminateImages = 0;
 
 % Obtaining run files
@@ -63,19 +63,19 @@ end
 if GetMask == 1
     Mask = DetermineMask([processeddirec '\Tracer Particles']);
     return
+else
+    Mask = [];
 end
-% else
-%     Mask = [];
-% end
 
-addpath('.\PIVlab')
+
+% addpath('.\PIVlab')
 suffix = '*.tiff';
 A = dir([processeddirec '\Tracer Particles\R*']); ProcessedRuns{i,1} = {};
     [ProcessedRuns{1:length(A),1}] = A.name;
     ProcessedRuns{i,1} = sortrows(ProcessedRuns{i})'; NumOfRuns = numel(ProcessedRuns); clear A
 
 for k = 1:NumOfRuns
-    k = 46;
+%     k = 46;
     disp(['Run ' num2str(k) ' of ' num2str(NumOfRuns)])
   
     [x{k},y{k},u{k},v{k},u_filt{k},v_filt{k}] = Miguel_PIVlab([processeddirec '\Tracer Particles' '\R' num2str(k) ], suffix,Mask);

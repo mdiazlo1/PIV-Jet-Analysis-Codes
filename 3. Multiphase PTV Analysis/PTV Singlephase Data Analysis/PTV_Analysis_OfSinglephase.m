@@ -1,5 +1,5 @@
 %% Directories
-direc = DirectoryAssignment('E:\PIV Data','2022_07_01',3,0,0);
+direc = DirectoryAssignment('E:\PIV Data','2022_06_28',3,0,0);
 
 [~,processeddirec,analyzeddirec] = direc.GeneratePaths();
 

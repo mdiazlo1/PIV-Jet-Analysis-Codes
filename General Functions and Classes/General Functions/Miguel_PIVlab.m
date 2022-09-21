@@ -33,10 +33,10 @@ s{2,1}= 'Step size 1';              s{2,2}=16;         % step of first pass
 s{3,1}= 'Subpix. finder';           s{3,2}=1;          % 1 = 3point Gauss, 2 = 2D Gauss
 s{4,1}= 'Mask';                     s{4,2}=Mask;        % If needed, generate via: imagesc(image); [temp,Mask{1,1},Mask{1,2}]=roipoly;
 s{5,1}= 'ROI';                      s{5,2}=[];       % Region of interest: [x,y,width,height] in pixels, may be left empty
-s{6,1}= 'Nr. of passes';            s{6,2}=3;          % 1-4 nr. of passes
-s{7,1}= 'Int. area 2';              s{7,2}=8;         % second pass window size
+s{6,1}= 'Nr. of passes';            s{6,2}=2;          % 1-4 nr. of passes
+s{7,1}= 'Int. area 2';              s{7,2}=16;         % second pass window size
 s{8,1}= 'Int. area 3';              s{8,2}=8;         % third pass window size
-s{9,1}= 'Int. area 4';              s{9,2}=16;         % fourth pass window size
+s{9,1}= 'Int. area 4';              s{9,2}=4;         % fourth pass window size
 s{10,1}='Window deformation';       s{10,2}='*spline'; % '*spline' is more accurate, but slower
 s{11,1}='Repeated Correlation';     s{11,2}=1;         % 0 or 1 : Repeat the correlation four times and multiply the correlation matrices.
 s{12,1}='Disable Autocorrelation';  s{12,2}=0;         % 0 or 1 : Disable Autocorrelation in the first pass.
